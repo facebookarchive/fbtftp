@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include fbtftp *
+recursive-include example *
+recursive-include tests *
