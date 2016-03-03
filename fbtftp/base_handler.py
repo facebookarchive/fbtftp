@@ -348,7 +348,13 @@ class BaseHandler(multiprocessing.Process):
         if self._last_block_sent > constants.MAX_BLOCK_NUMBER:
             self._last_block_sent = 0  # Wrap around the block counter.
         try:
+            last_size = 0  # current_block size before read. Used to check EOF.
             self._current_block = self._response_data.read(self._block_size)
+            while (len(self._current_block) != self._block_size and
+                   len(self._current_block) != last_size):
+                last_size = len(self._current_block)
+                self._current_block += self._response_data.read(
+                        self._block_size - last_size)
         except Exception as e:
             logging.exception('Error while reading from source: %s' % e)
             self._stats.error = {
