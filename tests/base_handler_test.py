@@ -325,11 +325,43 @@ class testSessionHandler(unittest.TestCase):
         self.assertTrue(self.handler._should_stop)
 
     def testNextBlock(self):
+
+        class MockResponse(object):
+            def __init__(self, dataiter):
+                self._dataiter = dataiter
+
+            def read(self, size=0):
+                try:
+                    return next(self._dataiter)
+                except StopIteration:
+                    return None
+
+        # single-packet file
         self.handler._last_block_sent = 0
         self.handler._block_size = 1400
         self.handler._response_data = StringResponseData('bacon')
         self.handler._next_block()
         self.assertEqual(self.handler._current_block, b'bacon')
+        self.assertEqual(self.handler._last_block_sent, 1)
+
+        # multi-packet file
+        self.handler._last_block_sent = 0
+        self.handler._block_size = 1400
+        self.handler._response_data = StringResponseData('bacon' * 281)
+        self.handler._next_block()
+        self.assertEqual(self.handler._current_block, b'bacon' * 280)
+        self.assertEqual(self.handler._last_block_sent, 1)
+        self.handler._next_block()
+        self.assertEqual(self.handler._current_block, b'bacon')
+        self.assertEqual(self.handler._last_block_sent, 2)
+
+        # partial read
+        data = MockResponse(iter('bacon'))
+        self.handler._last_block_sent = 0
+        self.handler._block_size = 1400
+        self.handler._response_data.read = data.read
+        self.handler._next_block()
+        self.assertEqual(self.handler._current_block, 'bacon')
         self.assertEqual(self.handler._last_block_sent, 1)
 
         self.handler._last_block_sent = constants.MAX_BLOCK_NUMBER + 1
