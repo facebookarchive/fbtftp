@@ -34,6 +34,7 @@ class MockHandler(BaseHandler):
 
     def __init__(self, server_addr, peer, path, options, stats_callback,
                  network_queue=[]):
+        self.response = StringResponseData("foo")
         BaseHandler.__init__(self, server_addr, peer, path,
                              options, stats_callback)
         self._listener = MockSocketListener(network_queue, peer)
@@ -44,8 +45,8 @@ class MockHandler(BaseHandler):
     def get_response_data(self):
         """ returns a mock ResponseData object"""
         self._response_data = Mock()
-        self._response_data.read = Mock(return_value=b'foo')
-        self._response_data.size = Mock(return_value=3)
+        self._response_data.read = self.response.read
+        self._response_data.size = self.response.size
         return self._response_data
 
 
@@ -297,6 +298,7 @@ class testSessionHandler(unittest.TestCase):
     def testHandleAck(self):
         self.handler._last_block_sent = 1
         self.handler._handle_timeout = Mock()
+        self.handler._next_block = Mock()
         self.handler._handle_ack(2)
         self.handler._handle_timeout.assert_called_with()
 
@@ -325,9 +327,9 @@ class testSessionHandler(unittest.TestCase):
     def testNextBlock(self):
         self.handler._last_block_sent = 0
         self.handler._block_size = 1400
-        self.handler._response_data.read = Mock(return_value="bacon")
+        self.handler._response_data = StringResponseData('bacon')
         self.handler._next_block()
-        self.assertEqual(self.handler._current_block, 'bacon')
+        self.assertEqual(self.handler._current_block, b'bacon')
         self.assertEqual(self.handler._last_block_sent, 1)
 
         self.handler._last_block_sent = constants.MAX_BLOCK_NUMBER + 1
