@@ -66,7 +66,7 @@ def busyboxClient(filename, blksize=1400, port=1069):
     # We use busybox cli to test various bulksizes
     p = subprocess.Popen(
         [
-            '/sbin/busybox',
+            find_executable('busybox'),
             'tftp',
             '-l', '/dev/stdout',
             '-r', filename,
