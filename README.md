@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/facebook/fbtftp.svg?token=SzJozVqgScpPpoBzmsZo&branch=master)](https://travis-ci.com/facebook/fbtftp)
+
 # What is fbtftp?
 
 `fbtftp` is Facebook's implementation of a dynamic TFTP server framework. It
