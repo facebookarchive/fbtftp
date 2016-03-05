@@ -29,8 +29,8 @@ class ServerStats(object):
         `ServerStats` represents a digest of what happened during the server's
         lifetime.
 
-        This class exposes a counter interface with get/set/reset methods and an
-        atomic get-and-reset.
+        This class exposes a counter interface with get/set/reset methods and
+        an atomic get-and-reset.
 
         An instance of this class is passed to a periodic function that is
         executed by a background thread inside the `BaseServer` object.
@@ -45,9 +45,9 @@ class ServerStats(object):
             interval (int): stats interval in seconds.
 
         Note:
-            `server_addr` and `interval` are provided by the `BaseServer` class.
-            They are not used in this class, they are there for the programmer's
-            convenience, in case one wants to use them.
+            `server_addr` and `interval` are provided by the `BaseServer`
+            class.  They are not used in this class, they are there for the
+            programmer's convenience, in case one wants to use them.
         """
         self.server_addr = server_addr
         self.interval = interval
@@ -80,8 +80,8 @@ class ServerStats(object):
 
     def get_counter(self, name):
         """
-        Get a counter value by name. Do not use this method if you have to reset
-        a counter after getting it. Use `get_and_reset_counter` instead.
+        Get a counter value by name. Do not use this method if you have to
+        reset a counter after getting it. Use `get_and_reset_counter` instead.
 
         Args:
             name (str): the counter
@@ -167,8 +167,8 @@ class BaseServer(object):
 
         Note:
             This class doesn't have to be used directly, you must inherit from
-            it and override the `get_handler()`` method to return an instance of
-            `BaseHandler`.
+            it and override the `get_handler()`` method to return an instance
+            of `BaseHandler`.
 
         Args:
             address (str): address (IPv4 or IPv6) the server needs to bind to.

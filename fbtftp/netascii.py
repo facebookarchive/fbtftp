@@ -17,9 +17,9 @@ class NetasciiReader(object):
     NetasciiReader encodes data coming from a reader into NetASCII.
 
     If the size of the returned data needs to be known in advance this will
-    actually have to load the whole content of its underlying reader into memory
-    which is suboptimal but also the only way in which we can make NetASCII work
-    with the 'tsize' TFTP extension.
+    actually have to load the whole content of its underlying reader into
+    memory which is suboptimal but also the only way in which we can make
+    NetASCII work with the 'tsize' TFTP extension.
 
     Note:
         This is an internal class and should not be modified.

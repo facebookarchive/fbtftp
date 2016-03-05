@@ -104,8 +104,8 @@ class BaseHandler(multiprocessing.Process):
 
             path (string): requested file
 
-            options (dict): a dictionary containing the options the client wants
-                to negotiate.
+            options (dict): a dictionary containing the options the client
+                wants to negotiate.
 
             stats_callback (callable): a callable that will be executed at the
                 end of the session. It gets passed an instance of the
@@ -354,7 +354,7 @@ class BaseHandler(multiprocessing.Process):
                    len(self._current_block) != last_size):
                 last_size = len(self._current_block)
                 self._current_block += self._response_data.read(
-                        self._block_size - last_size)
+                    self._block_size - last_size)
         except Exception as e:
             logging.exception('Error while reading from source: %s' % e)
             self._stats.error = {
