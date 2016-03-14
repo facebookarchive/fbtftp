@@ -1,0 +1,15 @@
+*.egg
+*.egg-info/
+*.eggs
+*.gz
+*.o
+*.pyc
+*.pyd
+*.pyo
+*.so
+*.swp
+*.zip
+.coverage
+__pycache__/
+build/
+dist/

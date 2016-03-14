@@ -1,0 +1,9 @@
+include AUTHORS
+include CONTRIBUTING.md
+include LICENSE
+include LICENSE-examples
+include PATENTS
+include README.md
+recursive-include fbtftp *
+recursive-include examples *
+recursive-include tests *
