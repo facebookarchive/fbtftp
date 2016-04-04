@@ -38,7 +38,7 @@ We created our own Facebook-specific server based on the framework to:
 * publish per-server and per-connection statistics to our internal monitoring
   systems;
 * deployment is easy and "container-ready", just copy the application somewhere,
-  start it and your are done.
+  start it and you are done.
 
 # Is it better than the other TFTP servers?
 
@@ -151,7 +151,7 @@ class FileResponseData(ResponseData):
         self._reader.close()
 
 def print_session_stats(stats):
-  print(stats)
+    print(stats)
 
 def print_server_stats(stats):
     counters = stats.get_and_reset_all_counters()
