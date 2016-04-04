@@ -151,7 +151,7 @@ class FileResponseData(ResponseData):
         self._reader.close()
 
 def print_session_stats(stats):
-  print(stats)
+    print(stats)
 
 def print_server_stats(stats):
     counters = stats.get_and_reset_all_counters()
