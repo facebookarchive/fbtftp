@@ -132,7 +132,6 @@ class testBaseServer(unittest.TestCase):
             time.sleep(1)
             if stats_callback.mock_called:
                 print('Stats callback executed')
-                stats_callback.assert_called_with(server._server_stats)
                 break
         server._metrics_timer.cancel()
 
