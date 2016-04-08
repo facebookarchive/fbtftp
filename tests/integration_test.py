@@ -36,9 +36,7 @@ class FileResponseData(ResponseData):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        super(self.__class__, self).__init__(
-            server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
@@ -48,7 +46,7 @@ class StaticServer(BaseServer):
     def __init__(self, address, port, retries, timeout, root, stats_callback):
         self._root = root
         self._stats_callback = stats_callback
-        super(self.__class__, self).__init__(address, port, retries, timeout)
+        super().__init__(address, port, retries, timeout)
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(
@@ -79,16 +77,14 @@ def busyboxClient(filename, blksize=1400, port=1069):
     return (stdout, stderr, p.returncode)
 
 
+@unittest.skipUnless(
+    find_executable('busybox'),
+    'busybox binary not present, install it if you want to run '
+    'integration tests'
+)
 class integrationTest(unittest.TestCase):
     def setUp(self):
         logging.getLogger().setLevel(logging.DEBUG)
-        # search for busybox on PATH, if not present we skip this integration
-        # test.
-        if not find_executable('busybox'):
-            self.skipTest(
-                'busybox binary not present, install it if you want to run '
-                'integration tests'
-            )
 
         self.tmpdirname = tempfile.TemporaryDirectory()
         logging.info("Created temporary directory %s" % self.tmpdirname)

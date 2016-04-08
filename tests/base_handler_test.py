@@ -16,7 +16,7 @@ from fbtftp.base_handler import BaseHandler, StringResponseData
 from fbtftp import constants
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue, peer):
         self._network_queue = network_queue
         self._peer = peer
@@ -36,9 +36,7 @@ class MockHandler(BaseHandler):
         network_queue=[]
     ):
         self.response = StringResponseData("foo")
-        super(self.__class__, self).__init__(
-            server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
         self._listener = MockSocketListener(network_queue, peer)
         self._listener.sendto = Mock()
         self._listener.close = Mock()
@@ -362,7 +360,7 @@ class testSessionHandler(unittest.TestCase):
         self.assertTrue(self.handler._should_stop)
 
     def testNextBlock(self):
-        class MockResponse(object):
+        class MockResponse:
             def __init__(self, dataiter):
                 self._dataiter = dataiter
 

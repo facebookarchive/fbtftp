@@ -15,7 +15,7 @@ MOCK_SOCKET_FILENO = 100
 SELECT_EPOLLIN = 1
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue):
         self._network_queue = network_queue
 
@@ -39,9 +39,8 @@ class StaticServer(BaseServer):
         self, address, port, retries, timeout, root, stats_callback,
         stats_interval, network_queue
     ):
-        super(self.__class__, self).__init__(
-            address, port, retries, timeout, stats_callback,
-            stats_interval
+        super().__init__(
+            address, port, retries, timeout, stats_callback, stats_interval
         )
         self._root = root
         # mock the network

@@ -9,7 +9,7 @@
 import io
 
 
-class NetasciiReader(object):
+class NetasciiReader:
     """
     NetasciiReader encodes data coming from a reader into NetASCII.
 

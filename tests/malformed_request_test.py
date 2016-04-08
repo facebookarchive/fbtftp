@@ -32,7 +32,7 @@ TEST_PAYLOADS = (
 )
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue):
         self._network_queue = network_queue
 
@@ -50,7 +50,7 @@ class StaticServer(BaseServer):
         self, address, port, retries, timeout, root, stats_callback,
         network_queue
     ):
-        super(self.__class__, self).__init__(address, port, retries, timeout)
+        super().__init__(address, port, retries, timeout)
         self._root = root
         # mock the network
         self._listener = MockSocketListener(network_queue)

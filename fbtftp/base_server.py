@@ -6,11 +6,6 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import collections
 import logging
 import select
@@ -23,7 +18,7 @@ import traceback
 from . import constants
 
 
-class ServerStats(object):
+class ServerStats:
     def __init__(self, server_addr=None, interval=None):
         """
         `ServerStats` represents a digest of what happened during the server's
@@ -156,7 +151,7 @@ class ServerStats(object):
         return time.time() - self.start_time
 
 
-class BaseServer(object):
+class BaseServer:
     def __init__(
         self,
         address,
@@ -296,7 +291,7 @@ class BaseServer(object):
         data, peer = self._listener.recvfrom(constants.DEFAULT_BLKSIZE)
         code = struct.unpack('!H', data[:2])[0]
         if code != constants.OPCODE_RRQ:
-            logging.warn(
+            logging.warning(
                 'unexpected TFTP opcode %d, expected %d' %
                 (code, constants.OPCODE_RRQ)
             )
