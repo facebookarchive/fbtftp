@@ -290,7 +290,7 @@ class BaseServer:
         data, peer = self._listener.recvfrom(constants.DEFAULT_BLKSIZE)
         code = struct.unpack('!H', data[:2])[0]
         if code != constants.OPCODE_RRQ:
-            logging.warn(
+            logging.warning(
                 'unexpected TFTP opcode %d, expected %d' %
                 (code, constants.OPCODE_RRQ)
             )
