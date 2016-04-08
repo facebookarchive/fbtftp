@@ -1,13 +1,9 @@
+#!/usr/bin/env python3
 # Copyright 2016-present, Facebook, Inc.
 # All rights reserved.
 #
 # This source code is licensed under the license found in the
 # LICENSE-examples file in the root directory of this source tree.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import argparse
 import logging
@@ -65,8 +61,8 @@ def print_server_stats(stats):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback
+        super(self.__class__, self).__init__(
+            server_addr, peer, path, options, stats_callback
         )
 
     def get_response_data(self):
@@ -86,8 +82,8 @@ class StaticServer(BaseServer):
     ):
         self._root = root
         self._handler_stats_callback = handler_stats_callback
-        BaseServer.__init__(
-            self, address, port, retries, timeout, server_stats_callback
+        super(self.__class__, self).__init__(
+            address, port, retries, timeout, server_stats_callback
         )
 
     def get_handler(self, server_addr, peer, path, options):
