@@ -5,11 +5,6 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from distutils.spawn import find_executable
 
 import logging
@@ -40,9 +35,7 @@ class FileResponseData(ResponseData):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
@@ -52,7 +45,7 @@ class StaticServer(BaseServer):
     def __init__(self, address, port, retries, timeout, root, stats_callback):
         self._root = root
         self._stats_callback = stats_callback
-        BaseServer.__init__(self, address, port, retries, timeout)
+        super().__init__(address, port, retries, timeout)
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(

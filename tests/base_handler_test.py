@@ -5,11 +5,6 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from unittest.mock import patch, Mock, call
 from fbtftp.netascii import NetasciiReader
 import socket
@@ -20,7 +15,7 @@ from fbtftp.base_handler import BaseHandler, StringResponseData
 from fbtftp import constants
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue, peer):
         self._network_queue = network_queue
         self._peer = peer
@@ -40,9 +35,7 @@ class MockHandler(BaseHandler):
         network_queue=[]
     ):
         self.response = StringResponseData("foo")
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
         self._listener = MockSocketListener(network_queue, peer)
         self._listener.sendto = Mock()
         self._listener.close = Mock()
@@ -366,7 +359,7 @@ class testSessionHandler(unittest.TestCase):
         self.assertTrue(self.handler._should_stop)
 
     def testNextBlock(self):
-        class MockResponse(object):
+        class MockResponse:
             def __init__(self, dataiter):
                 self._dataiter = dataiter
 

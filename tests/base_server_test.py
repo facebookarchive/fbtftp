@@ -5,11 +5,6 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from unittest.mock import patch, Mock
 import unittest
 
@@ -19,7 +14,7 @@ MOCK_SOCKET_FILENO = 100
 SELECT_EPOLLIN = 1
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue):
         self._network_queue = network_queue
 
@@ -43,9 +38,8 @@ class StaticServer(BaseServer):
         self, address, port, retries, timeout, root, stats_callback,
         stats_interval, network_queue
     ):
-        BaseServer.__init__(
-            self, address, port, retries, timeout, stats_callback,
-            stats_interval
+        super().__init__(
+            address, port, retries, timeout, stats_callback, stats_interval
         )
         self._root = root
         # mock the network

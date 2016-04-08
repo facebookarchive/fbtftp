@@ -4,11 +4,6 @@
 # This source code is licensed under the license found in the
 # LICENSE-examples file in the root directory of this source tree.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import logging
 import os
@@ -65,9 +60,7 @@ def print_server_stats(stats):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
@@ -86,9 +79,7 @@ class StaticServer(BaseServer):
     ):
         self._root = root
         self._handler_stats_callback = handler_stats_callback
-        BaseServer.__init__(
-            self, address, port, retries, timeout, server_stats_callback
-        )
+        super().__init__(address, port, retries, timeout, server_stats_callback)
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(
