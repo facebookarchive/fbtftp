@@ -76,16 +76,14 @@ def busyboxClient(filename, blksize=1400, port=1069):
     return (stdout, stderr, p.returncode)
 
 
+@unittest.skipUnless(
+    find_executable('busybox'),
+    'busybox binary not present, install it if you want to run '
+    'integration tests'
+)
 class integrationTest(unittest.TestCase):
     def setUp(self):
         logging.getLogger().setLevel(logging.DEBUG)
-        # search for busybox on PATH, if not present we skip this integration
-        # test.
-        if not find_executable('busybox'):
-            self.skipTest(
-                'busybox binary not present, install it if you want to run '
-                'integration tests'
-            )
 
         self.tmpdirname = tempfile.TemporaryDirectory()
         logging.info("Created temporary directory %s" % self.tmpdirname)
