@@ -14,27 +14,21 @@ from fbtftp.base_handler import StringResponseData
 
 class testNetAsciiReader(unittest.TestCase):
     def testNetAsciiReader(self):
-        input_content = "foo\nbar\nand another\none"
-        resp_data = StringResponseData(input_content)
-        n = NetasciiReader(resp_data)
-        self.assertGreater(n.size(), len(input_content))
-        output = n.read(512)
-        self.assertEqual(
-            bytearray(b'foo\r\nbar\r\nand another\r\none'), output
-        )
-        n.close()
-
-    def testNetAsciiReaderWithSlashR(self):
-        input_content = "foo\r\nbar\r\nand another\r\none"
-        resp_data = StringResponseData(input_content)
-        n = NetasciiReader(resp_data)
-        self.assertGreater(n.size(), len(input_content))
-        output = n.read(512)
-        self.assertEqual(
-            bytearray(b'foo\r\x00\r\nbar\r\x00\r\nand another\r\x00\r\none'),
-            output
-        )
-        n.close()
+        tests = [
+            # content, expected output
+            ("foo\nbar\nand another\none",
+             bytearray(b'foo\r\nbar\r\nand another\r\none')),
+            ("foo\r\nbar\r\nand another\r\none",
+             bytearray(b'foo\r\x00\r\nbar\r\x00\r\nand another\r\x00\r\none')),
+        ]
+        for input_content, expected in tests:
+            with self.subTest(content=input_content):
+                resp_data = StringResponseData(input_content)
+                n = NetasciiReader(resp_data)
+                self.assertGreater(n.size(), len(input_content))
+                output = n.read(512)
+                self.assertEqual(output, expected)
+                n.close()
 
     def testNetAsciiReaderBig(self):
         input_content = "I\nlike\ncrunchy\nbacon\n"
