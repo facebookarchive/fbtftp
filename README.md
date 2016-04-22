@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/facebook/fbtftp.svg?token=SzJozVqgScpPpoBzmsZo&branch=master)](https://travis-ci.com/facebook/fbtftp)
+[![Build Status](https://travis-ci.org/facebook/fbtftp.svg?branch=master)](https://travis-ci.org/facebook/fbtftp)
 
 # What is fbtftp?
 
