@@ -1,14 +1,10 @@
+#!/usr/bin/env python3
 # Copyright (c) 2016-present, Facebook, Inc.
 # All rights reserved.
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 from distutils.spawn import find_executable
 
@@ -40,9 +36,7 @@ class FileResponseData(ResponseData):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback
-        )
+        super().__init__(server_addr, peer, path, options, stats_callback)
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
@@ -52,7 +46,7 @@ class StaticServer(BaseServer):
     def __init__(self, address, port, retries, timeout, root, stats_callback):
         self._root = root
         self._stats_callback = stats_callback
-        BaseServer.__init__(self, address, port, retries, timeout)
+        super().__init__(address, port, retries, timeout)
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(
@@ -83,16 +77,14 @@ def busyboxClient(filename, blksize=1400, port=1069):
     return (stdout, stderr, p.returncode)
 
 
+@unittest.skipUnless(
+    find_executable('busybox'),
+    'busybox binary not present, install it if you want to run '
+    'integration tests'
+)
 class integrationTest(unittest.TestCase):
     def setUp(self):
         logging.getLogger().setLevel(logging.DEBUG)
-        # search for busybox on PATH, if not present we skip this integration
-        # test.
-        if not find_executable('busybox'):
-            self.skipTest(
-                'busybox binary not present, install it if you want to run '
-                'integration tests'
-            )
 
         self.tmpdirname = tempfile.TemporaryDirectory()
         logging.info("Created temporary directory %s" % self.tmpdirname)

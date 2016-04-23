@@ -1,14 +1,10 @@
+#!/usr/bin/env python3
 # Copyright (c) 2016-present, Facebook, Inc.
 # All rights reserved.
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import io
 import ipaddress
@@ -23,8 +19,8 @@ from . import constants
 from .netascii import NetasciiReader
 
 
-class ResponseData(object):
-    """A base class reprenting a file-like object"""
+class ResponseData:
+    """A base class representing a file-like object"""
 
     def read(self, n):
         raise NotImplementedError()
@@ -56,7 +52,7 @@ class StringResponseData(ResponseData):
         pass
 
 
-class SessionStats(object):
+class SessionStats:
     """
     SessionStats represents a digest of what happened during a session.
     Data inside the object gets populated at the end of a session.
@@ -153,7 +149,7 @@ class BaseHandler(multiprocessing.Process):
         self._listener = socket.socket(family, socket.SOCK_DGRAM)
 
         self._listener.bind((str(server_addr[0]), 0))
-        multiprocessing.Process.__init__(self)
+        super().__init__()
 
     def _on_close(self):
         """

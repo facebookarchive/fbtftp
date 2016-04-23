@@ -1,14 +1,10 @@
+#!/usr/bin/env python3
 # Copyright (c) 2016-present, Facebook, Inc.
 # All rights reserved.
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import tempfile
 import unittest
@@ -36,7 +32,7 @@ TEST_PAYLOADS = (
 )
 
 
-class MockSocketListener(object):
+class MockSocketListener:
     def __init__(self, network_queue):
         self._network_queue = network_queue
 
@@ -54,7 +50,7 @@ class StaticServer(BaseServer):
         self, address, port, retries, timeout, root, stats_callback,
         network_queue
     ):
-        BaseServer.__init__(self, address, port, retries, timeout)
+        super().__init__(address, port, retries, timeout)
         self._root = root
         # mock the network
         self._listener = MockSocketListener(network_queue)

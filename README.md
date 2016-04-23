@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/facebook/fbtftp.svg?token=SzJozVqgScpPpoBzmsZo&branch=master)](https://travis-ci.com/facebook/fbtftp)
+[![Build Status](https://travis-ci.org/facebook/fbtftp.svg?branch=master)](https://travis-ci.org/facebook/fbtftp)
 
 # What is fbtftp?
 
@@ -161,8 +161,7 @@ def print_server_stats(stats):
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
         self._root = root
-        BaseHandler.__init__(
-            self, server_addr, peer, path, options, stats_callback)
+        super().__init__(server_addr, peer, path, options, stats_callback)
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
@@ -172,8 +171,7 @@ class StaticServer(BaseServer):
                  handler_stats_callback, server_stats_callback=None):
         self._root = root
         self._handler_stats_callback = handler_stats_callback
-        BaseServer.__init__(
-            self, address, port, retries, timeout, server_stats_callback)
+        super().__init__(address, port, retries, timeout, server_stats_callback)
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(

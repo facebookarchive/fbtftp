@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (c) 2016-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -5,14 +6,10 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 import io
 
 
-class NetasciiReader(object):
+class NetasciiReader:
     """
     NetasciiReader encodes data coming from a reader into NetASCII.
 
