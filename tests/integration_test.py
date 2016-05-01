@@ -54,7 +54,7 @@ class StaticServer(BaseServer):
         )
 
 
-def busyboxClient(filename, blksize=1400, port=1069):
+def busyboxClient(filename, address='localhost', blksize=1400, port=1069):
     # We use busybox cli to test various bulksizes
     p = subprocess.Popen(
         [
@@ -67,7 +67,7 @@ def busyboxClient(filename, blksize=1400, port=1069):
             '-g',
             '-b',
             str(blksize),
-            'localhost',
+            address,
             str(port),
         ],
         stdout=subprocess.PIPE,
@@ -117,7 +117,15 @@ class integrationTest(unittest.TestCase):
     def testDownloadBulkSizes(self):
         for b in (512, 1400):
             self.blksize = b
-            server = StaticServer(
+            v4_server = StaticServer(
+                '127.0.0.1',
+                0,  # let the kernel decide the port
+                2,
+                2,
+                self.tmpdirname,
+                self.stats
+            )
+            v6_server = StaticServer(
                 '::',
                 0,  # let the kernel decide the port
                 2,
@@ -125,27 +133,29 @@ class integrationTest(unittest.TestCase):
                 self.tmpdirname,
                 self.stats
             )
-            child_pid = os.fork()
-            if child_pid:
-                # I am the parent
-                try:
-                    (p_stdout, p_stderr, p_returncode) = busyboxClient(
-                        self.tmpfile,
-                        blksize=self.blksize,
-                        # use the port chosen for the server by the kernel
-                        port=server._listener.getsockname()[1]
-                    )
-                    self.assertEqual(0, p_returncode)
-                    if p_returncode != 0:
-                        self.fail((p_stdout, p_stderr, p_returncode))
-                    self.assertEqual(self.tmpfile_data, p_stdout)
-                finally:
-                    os.kill(child_pid, 15)
-                    os.waitpid(child_pid, 0)
-            else:
-                # I am the child
-                try:
-                    server.run()
-                except KeyboardInterrupt:
-                    server.close()
-                self.assertEqual(1, self.called_stats_times)
+            for server in [v4_server, v6_server]:
+                child_pid = os.fork()
+                if child_pid:
+                    # I am the parent
+                    try:
+                        (p_stdout, p_stderr, p_returncode) = busyboxClient(
+                            self.tmpfile,
+                            server._address,
+                            blksize=self.blksize,
+                            # use the port chosen for the server by the kernel
+                            port=server._listener.getsockname()[1]
+                        )
+                        self.assertEqual(0, p_returncode)
+                        if p_returncode != 0:
+                            self.fail((p_stdout, p_stderr, p_returncode))
+                        self.assertEqual(self.tmpfile_data, p_stdout)
+                    finally:
+                        os.kill(child_pid, 15)
+                        os.waitpid(child_pid, 0)
+                else:
+                    # I am the child
+                    try:
+                        server.run()
+                    except KeyboardInterrupt:
+                        server.close()
+                    self.assertEqual(1, self.called_stats_times)

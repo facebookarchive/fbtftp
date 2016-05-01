@@ -200,8 +200,17 @@ class BaseServer:
         self._timeout = timeout
         self._server_stats_callback = server_stats_callback
         self._listener = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+        try:
+            self._listener.bind((address, port))
+        except socket.gaierror as e:
+            if e.errno == socket.EAI_ADDRFAMILY:
+                self._listener = socket.socket(
+                    socket.AF_INET, socket.SOCK_DGRAM
+                )
+                self._listener.bind((address, port))
+            else:
+                raise
         self._listener.setblocking(0)  # non-blocking
-        self._listener.bind((address, port))
         self._epoll = select.epoll()
         self._epoll.register(self._listener.fileno(), select.EPOLLIN)
         self._should_stop = False
