@@ -1,4 +1,11 @@
-PYTHON=python3  # if there's no python3 binary this will fail first
+PYTHON=python3
+PYTHON3 := $(shell command -v python3)
+PYTHON35 := $(shell command -v python3.5)
+ifndef PYTHON3
+	ifdef PYTHON35
+		PYTHON=python3.5
+	endif
+endif
 PYTHON_MAJOR_AT_LEAST=3
 PYTHON_MINOR_AT_LEAST=3
 PYTHON_VERSION := $(shell $(PYTHON) -c 'from __future__ import print_function; import platform; print(platform.python_version())')
