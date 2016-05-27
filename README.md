@@ -193,8 +193,7 @@ if __name__ == '__main__':
 
 # Who wrote it?
 
-`fbtftp` was created by Angelo Failla <pallotron@fb.com> at Facebook Ireland.
+`fbtftp` was created by Marcin Wyszynski (@marcinwyszynski) and Angelo Failla <pallotron@fb.com> at Facebook Ireland.
 
 Other honorable contributors:
-* Marcin Wyszynski (@marcinwyszynski)
 * Andrea Barberio <barberio@fb.com>
