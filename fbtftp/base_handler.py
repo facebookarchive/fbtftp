@@ -120,18 +120,19 @@ class BaseHandler(multiprocessing.Process):
         self._options = options
         self._stats_callback = stats_callback
         self._response_data = None
+        self._listener = None
 
         self._peer = peer
         logging.info(
             "New connection from peer `%s` asking for path `%s`" %
             (str(peer), str(path))
         )
-        family = socket.AF_INET6
+        self._family = socket.AF_INET6
         # the format of the peer tuple is different for v4 and v6
         if isinstance(
             ipaddress.ip_address(server_addr[0]), ipaddress.IPv4Address
         ):
-            family = socket.AF_INET
+            self._family = socket.AF_INET
             # peer address format is different in v4 world
             self._peer = (self._peer[0].replace('::ffff:', ''), self._peer[1])
 
@@ -146,10 +147,13 @@ class BaseHandler(multiprocessing.Process):
                 'error_message': str(e),
             }
 
-        self._listener = socket.socket(family, socket.SOCK_DGRAM)
-
-        self._listener.bind((str(server_addr[0]), 0))
         super().__init__()
+
+    def _get_listener(self):
+        if not self._listener:
+            self._listener = socket.socket(self._family, socket.SOCK_DGRAM)
+            self._listener.bind((str(self._server_addr[0]), 0))
+        return self._listener
 
     def _on_close(self):
         """
@@ -178,7 +182,7 @@ class BaseHandler(multiprocessing.Process):
             if self._response_data:
                 self._response_data.close()
             logging.debug('Closing socket')
-            self._listener.close()
+            self._get_listener().close()
             logging.debug('Dying.')
             if test is False:
                 sys.exit(0)
@@ -277,9 +281,10 @@ class BaseHandler(multiprocessing.Process):
         # Note that we use blocking socket, because it has its own dedicated
         # process. We read only 512 bytes.
         try:
-            self._listener.settimeout(self._timeout)
-            data, peer = self._listener.recvfrom(constants.DEFAULT_BLKSIZE)
-            self._listener.settimeout(None)
+            listener = self._get_listener()
+            listener.settimeout(self._timeout)
+            data, peer = listener.recvfrom(constants.DEFAULT_BLKSIZE)
+            listener.settimeout(None)
         except socket.timeout:
             self._stats.error = {
                 'error_code': constants.ERR_UNDEFINED,
@@ -389,7 +394,7 @@ class BaseHandler(multiprocessing.Process):
             fmt, constants.OPCODE_DATA, self._last_block_sent,
             self._current_block
         )
-        self._listener.sendto(packet, self._peer)
+        self._get_listener().sendto(packet, self._peer)
         self._stats.packets_sent += 1
         self._stats.bytes_sent += len(self._current_block)
         if len(self._current_block) < self._block_size:
@@ -410,7 +415,7 @@ class BaseHandler(multiprocessing.Process):
         opts.append(b'')
         fmt = str('!H')
         packet = struct.pack(fmt, constants.OPCODE_OACK) + b'\x00'.join(opts)
-        self._listener.sendto(packet, self._peer)
+        self._get_listener().sendto(packet, self._peer)
         self._stats.packets_sent += 1
 
     def _transmit_error(self):
@@ -423,7 +428,7 @@ class BaseHandler(multiprocessing.Process):
             fmt, constants.OPCODE_ERROR, self._stats.error['error_code'],
             bytes(self._stats.error['error_message'].encode('latin-1'))
         )
-        self._listener.sendto(packet, self._peer)
+        self._get_listener().sendto(packet, self._peer)
 
     def get_response_data(self):
         """
