@@ -37,6 +37,8 @@ class MockHandler(BaseHandler):
     ):
         self.response = StringResponseData("foo")
         super().__init__(server_addr, peer, path, options, stats_callback)
+        self.network_queue = network_queue
+        self.peer = peer
         self._listener = MockSocketListener(network_queue, peer)
         self._listener.sendto = Mock()
         self._listener.close = Mock()
@@ -102,11 +104,11 @@ class testSessionHandler(unittest.TestCase):
         self.assertEqual(handler._options, self.options)
         self.assertEqual(handler._stats_callback, self.stats_callback)
         self.assertEqual(handler._peer, peer)
-        self.assertIsInstance(handler._listener, socket.socket)
+        self.assertIsInstance(handler._get_listener(), socket.socket)
         if universe == 6:
-            self.assertEqual(handler._listener.family, socket.AF_INET6)
+            self.assertEqual(handler._get_listener().family, socket.AF_INET6)
         else:
-            self.assertEqual(handler._listener.family, socket.AF_INET)
+            self.assertEqual(handler._get_listener().family, socket.AF_INET)
 
     def testInitV6(self):
         self.init(universe=6)
@@ -188,7 +190,7 @@ class testSessionHandler(unittest.TestCase):
                 'error_message'
             ].startswith('Unknown mode:')
         )
-        self.handler._listener.sendto.assert_called_with(
+        self.handler._get_listener().sendto.assert_called_with(
             # \x00\x05 == OPCODE_ERROR
             # \x00\x04 == ERR_ILLEGAL_OPERATION
             b"\x00\x05\x00\x04Unknown mode: 'IamBadAndIShoudlFeelBad'\x00",
@@ -216,7 +218,7 @@ class testSessionHandler(unittest.TestCase):
         self.handler._close(True)
         self.assertEqual(self.handler._retransmits, 100)
         self.handler._stats_callback.assert_called_with(self.handler._stats)
-        self.handler._listener.close.assert_called_with()
+        self.handler._get_listener().close.assert_called_with()
         self.handler._response_data.close.assert_called_with()
         self.handler._on_close = Mock()
         self.handler._on_close.side_effect = Exception('boom!')
@@ -271,7 +273,7 @@ class testSessionHandler(unittest.TestCase):
         )
         self.handler._last_block_sent = 1
         self.handler.on_new_data()
-        self.handler._listener.settimeout.assert_has_calls(
+        self.handler._get_listener().settimeout.assert_has_calls(
             [
                 call(
                     self.handler._timeout
@@ -284,14 +286,16 @@ class testSessionHandler(unittest.TestCase):
         #  ---------------------------------------
         #  | Opcode = 3 |   Block #  |   Data    |
         #  ---------------------------------------
-        self.handler._listener.sendto.assert_called_with(
+        self.handler._get_listener().sendto.assert_called_with(
             # client acknolwedges DATA block 1, we expect to send DATA block 2
             b'\x00\x03\x00\x02foo',
             ('127.0.0.1', 5678)
         )
 
     def testOnNewDataTimeout(self):
-        self.handler._listener.recvfrom = Mock(side_effect=socket.timeout())
+        self.handler._get_listener().recvfrom = Mock(
+            side_effect=socket.timeout()
+        )
         self.handler.on_new_data()
         self.assertTrue(self.handler._should_stop)
         self.assertEqual(
@@ -302,7 +306,7 @@ class testSessionHandler(unittest.TestCase):
         )
 
     def testOnNewDataDifferentPeer(self):
-        self.handler._listener.recvfrom = Mock(
+        self.handler._get_listener().recvfrom = Mock(
             return_value=(b'data', ('1.2.3.4', '9999'))
         )
         self.handler.on_new_data()
@@ -310,13 +314,15 @@ class testSessionHandler(unittest.TestCase):
 
     def testOnNewDataOpCodeError(self):
         error = b'\x00\x05\x00\x04some_error\x00'
-        self.handler._listener.recvfrom = Mock(return_value=(error, self.peer))
+        self.handler._get_listener().recvfrom = Mock(
+            return_value=(error, self.peer)
+        )
         self.handler.on_new_data()
         self.assertTrue(self.handler._should_stop)
-        self.handler._listener.sendto.assert_called_with(error, self.peer)
+        self.handler._get_listener().sendto.assert_called_with(error, self.peer)
 
     def testOnNewDataNoAck(self):
-        self.handler._listener.recvfrom = Mock(
+        self.handler._get_listener().recvfrom = Mock(
             return_value=(b'\x00\x02\x00\x04', self.peer)
         )
         self.handler.on_new_data()
@@ -421,11 +427,11 @@ class testSessionHandler(unittest.TestCase):
 
     def testTransmitOACK(self):
         self.handler._options = {'opt1': 'value1', }
-        self.handler._listener.sendto = Mock()
+        self.handler._get_listener().sendto = Mock()
         self.handler._stats.packets_sent = 1
         self.handler._transmit_oack()
         self.assertEqual(self.handler._stats.packets_sent, 2)
-        self.handler._listener.sendto.assert_called_with(
+        self.handler._get_listener().sendto.assert_called_with(
             # OACK code == 6
             b'\x00\x06opt1\x00value1\x00',
             ('127.0.0.1', 5678)

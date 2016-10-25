@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/facebook/fbtftp.svg?branch=master)](https://travis-ci.org/facebook/fbtftp)
+[![codebeat badge](https://codebeat.co/badges/2d4c7650-4752-4adf-a570-1948ecb4d6a8)](https://codebeat.co/projects/github-com-facebook-fbtftp)
 
 # What is fbtftp?
 
@@ -193,8 +194,7 @@ if __name__ == '__main__':
 
 # Who wrote it?
 
-`fbtftp` was created by Angelo Failla <pallotron@fb.com> at Facebook Ireland.
+`fbtftp` was created by Marcin Wyszynski (@marcinwyszynski) and Angelo Failla <pallotron@fb.com> at Facebook Ireland.
 
 Other honorable contributors:
-* Marcin Wyszynski (@marcinwyszynski)
 * Andrea Barberio <barberio@fb.com>
