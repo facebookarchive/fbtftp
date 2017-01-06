@@ -137,6 +137,7 @@ from fbtftp.base_server import BaseServer
 
 import os
 
+
 class FileResponseData(ResponseData):
     def __init__(self, path):
         self._size = os.stat(path).st_size
@@ -151,13 +152,16 @@ class FileResponseData(ResponseData):
     def close(self):
         self._reader.close()
 
+
 def print_session_stats(stats):
     print(stats)
+
 
 def print_server_stats(stats):
     counters = stats.get_and_reset_all_counters()
     print('Server stats - every {} seconds'.format(stats.interval))
     print(counters)
+
 
 class StaticHandler(BaseHandler):
     def __init__(self, server_addr, peer, path, options, root, stats_callback):
@@ -166,6 +170,7 @@ class StaticHandler(BaseHandler):
 
     def get_response_data(self):
         return FileResponseData(os.path.join(self._root, self._path))
+
 
 class StaticServer(BaseServer):
     def __init__(self, address, port, retries, timeout, root,
@@ -179,10 +184,12 @@ class StaticServer(BaseServer):
             server_addr, peer, path, options, self._root,
             self._handler_stats_callback)
 
+
 def main():
-    server = StaticServer(ip='', port='1069', retries=3, timeout=5,
-                          root='/var/tftproot', print_session_stats,
-                          print_server_stats)
+    server = StaticServer(address='127.0.0.1', port=1069, retries=3,
+                          timeout=5, root='/var/tftproot',
+                          handler_stats_callback=print_session_stats,
+                          server_stats_callback=print_server_stats)
     try:
         server.run()
     except KeyboardInterrupt:
