@@ -122,7 +122,7 @@ class integrationTest(unittest.TestCase):
                 0,  # let the kernel decide the port
                 2,
                 2,
-                self.tmpdirname,
+                self.tmpdirname.name,
                 self.stats
             )
             child_pid = os.fork()
