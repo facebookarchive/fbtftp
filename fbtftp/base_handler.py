@@ -300,6 +300,8 @@ class BaseHandler(multiprocessing.Process):
             return
         code, block_number = struct.unpack('!HH', data[:4])
         if code == constants.OPCODE_ERROR:
+            # When the client sends an OPCODE_ERROR#
+            # the block number is the ERR codes in constants.py
             self._stats.error = {
                 'error_code': block_number,
                 'error_message': data[4:-1].decode('ascii', 'ignore'),
