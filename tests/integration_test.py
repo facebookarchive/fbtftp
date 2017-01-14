@@ -118,7 +118,11 @@ class integrationTest(unittest.TestCase):
                 2,
                 2,
                 self.tmpdirname.name,
+<<<<<<< HEAD
                 self.stats,
+=======
+                self.stats
+>>>>>>> python3.6 support, fixed integration test
             )
             child_pid = os.fork()
             if child_pid:
