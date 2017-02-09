@@ -330,13 +330,7 @@ class BaseHandler(multiprocessing.Process):
     def _handle_ack(self, block_number):
         """Deals with a client ACK packet."""
         if block_number != self._last_block_sent:
-            # Unexpected ACK, let's handle this as a timeout, and resend the
-            # current block
-            logging.error(
-                "Unexpected ACK, let's handle this as a timeout, and resend "
-                "the current block"
-            )
-            self._handle_timeout()
+            # Unexpected ACK, let's ignore this.
             return
         self._reset_timeout()
         self._retransmits = 0

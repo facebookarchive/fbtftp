@@ -334,16 +334,12 @@ class testSessionHandler(unittest.TestCase):
             }
         )
 
-    def testHandleAck(self):
+    def testHandleUnexpectedAck(self):
         self.handler._last_block_sent = 1
-        self.handler._handle_timeout = Mock()
+        self.handler._reset_timeout = Mock()
         self.handler._next_block = Mock()
         self.handler._handle_ack(2)
-        self.handler._handle_timeout.assert_called_with()
-
-        self.handler._stats.packets_acked = 2
-        self.handler._handle_ack(1)
-        self.assertEqual(self.handler._stats.packets_acked, 3)
+        self.handler._reset_timeout.assert_not_called()
 
     def testHandleTimeout(self):
         self.handler._retries = 3
