@@ -6,6 +6,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
+from collections import OrderedDict
 from unittest.mock import patch, Mock, call
 from fbtftp.netascii import NetasciiReader
 import socket
@@ -54,14 +55,14 @@ class MockHandler(BaseHandler):
 
 class testSessionHandler(unittest.TestCase):
     def setUp(self):
-        self.options = {
-            'default_timeout': 10,
-            'retries': 2,
-            'mode': 'netascii',
-            'blksize': 1492,
-            'tsize': 0,
-            'timeout': 99
-        }
+        self.options = OrderedDict([
+            ('default_timeout', 10),
+            ('retries', 2),
+            ('mode', 'netascii'),
+            ('blksize', 1492),
+            ('tsize', 0),
+            ('timeout', 99)
+        ])
 
         self.server_addr = ('127.0.0.1', 1234)
         self.peer = ('127.0.0.1', 5678)

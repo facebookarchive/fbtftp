@@ -314,11 +314,12 @@ class BaseServer:
             return
 
         path = tokens[0]
-        options = {
-            'mode': tokens[1].lower(),
-            'default_timeout': self._timeout,
-            'retries': self._retries,
-        }
+        options = collections.OrderedDict([
+            ('mode', tokens[1].lower()),
+            ('default_timeout', self._timeout),
+            ('retries', self._retries)
+        ]
+        )
         pos = 2
         while pos < len(tokens):
             options[tokens[pos].lower()] = tokens[pos + 1]

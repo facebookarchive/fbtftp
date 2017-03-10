@@ -6,6 +6,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
+from collections import OrderedDict
 import io
 import ipaddress
 import logging
@@ -192,7 +193,7 @@ class BaseHandler(multiprocessing.Process):
         Method that deals with parsing/validation options provided by the
         client.
         """
-        opts_to_ack = {}
+        opts_to_ack = OrderedDict()
         # We remove retries and default_timeout from self._options because
         # we don't need to include them in the OACK response to the client.
         # Their value is already hold in self._retries and self._timeout.
@@ -214,16 +215,21 @@ class BaseHandler(multiprocessing.Process):
             self._transmit_error()
             self._close()
             return  # no way anything else will succeed now
-        if 'blksize' in self._options:
-            opts_to_ack['blksize'] = self._options['blksize']
-            self._block_size = int(self._options['blksize'])
-        if 'tsize' in self._options:
-            self._tsize = self._response_data.size()
-            if self._tsize is not None:
-                opts_to_ack['tsize'] = str(self._tsize)
-        if 'timeout' in self._options:
-            opts_to_ack['timeout'] = self._options['timeout']
-            self._timeout = int(opts_to_ack['timeout'])
+        # Let's ack the options in the same order we got asked for them
+        # The RFC mentions that option order is not significant, but it can't
+        # hurt. This relies on Python 3.6 dicts to be ordered.
+        for k, v in self._options.items():
+            if k == 'blksize':
+                opts_to_ack['blksize'] = v
+                self._block_size = int(v)
+            if k == 'tsize':
+                self._tsize = self._response_data.size()
+                if self._tsize is not None:
+                    opts_to_ack['tsize'] = str(self._tsize)
+            if k == 'timeout':
+                opts_to_ack['timeout'] = v
+                self._timeout = int(v)
+
         self._options = opts_to_ack  # only ACK options we can handle
         logging.info(
             'Options to ack for peer {}:  {}'.format(
