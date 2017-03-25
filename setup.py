@@ -17,8 +17,8 @@ class NoseTestCommand(TestCommand):
 
 
 here = path.abspath(path.dirname(__file__))
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+with open(path.join(here, 'README.md'), 'rb') as f:
+    long_description = f.read().decode('utf-8')
 
 setup(
     name='fbtftp',
