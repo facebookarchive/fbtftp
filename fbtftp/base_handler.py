@@ -292,11 +292,6 @@ class BaseHandler(multiprocessing.Process):
             data, peer = listener.recvfrom(constants.DEFAULT_BLKSIZE)
             listener.settimeout(None)
         except socket.timeout:
-            self._stats.error = {
-                'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout occurred on socket.recvfrom()',
-            }
-            self._should_stop = True
             return
         if peer != self._peer:
             logging.error(
@@ -345,7 +340,6 @@ class BaseHandler(multiprocessing.Process):
         self._transmit_data()
 
     def _handle_timeout(self):
-        self._stats.error = {}
         if self._retries >= self._retransmits:
             self._transmit_data()
             self._retransmits += 1
