@@ -115,8 +115,10 @@ class BaseHandler(multiprocessing.Process):
         self._block_size = constants.DEFAULT_BLKSIZE
         self._last_block_sent = 0
         self._retransmits = 0
+        self._global_retransmits = 0
         self._current_block = None
         self._should_stop = False
+        self._waiting_last_ack = False
         self._path = path
         self._options = options
         self._stats_callback = stats_callback
@@ -163,7 +165,7 @@ class BaseHandler(multiprocessing.Process):
         This method sets number of retransmissions and calls the stats callback
         at the end of the session.
         """
-        self._stats.retransmits = self._retransmits
+        self._stats.retransmits = self._global_retransmits
         self._stats_callback(self._stats)
 
     def _close(self, test=False):
@@ -330,12 +332,16 @@ class BaseHandler(multiprocessing.Process):
 
     def _handle_ack(self, block_number):
         """Deals with a client ACK packet."""
+
         if block_number != self._last_block_sent:
             # Unexpected ACK, let's ignore this.
             return
         self._reset_timeout()
         self._retransmits = 0
         self._stats.packets_acked += 1
+        if self._waiting_last_ack:
+            self._should_stop = True
+            return
         self._next_block()
         self._transmit_data()
 
@@ -343,11 +349,16 @@ class BaseHandler(multiprocessing.Process):
         if self._retries >= self._retransmits:
             self._transmit_data()
             self._retransmits += 1
+            self._global_retransmits += 1
             return
+
+        error_msg = f'timeout after {self._retransmits} retransmits.'
+        if self._waiting_last_ack:
+            error_msg += ' Missed last ack.'
+
         self._stats.error = {
             'error_code': constants.ERR_UNDEFINED,
-            'error_message':
-            'timeout after %d retransmits' % self._retransmits,
+            'error_message': error_msg,
         }
         self._should_stop = True
         logging.error(self._stats.error['error_message'])
@@ -382,9 +393,6 @@ class BaseHandler(multiprocessing.Process):
 
     def _transmit_data(self):
         """Method that deals with sending a block to the wire."""
-        if self._current_block is None:
-            self._should_stop = True
-            return
         fmt = '!HH%ds' % len(self._current_block)
         packet = struct.pack(
             fmt, constants.OPCODE_DATA, self._last_block_sent,
@@ -394,7 +402,7 @@ class BaseHandler(multiprocessing.Process):
         self._stats.packets_sent += 1
         self._stats.bytes_sent += len(self._current_block)
         if len(self._current_block) < self._block_size:
-            self._should_stop = True
+            self._waiting_last_ack = True
 
     def _transmit_oack(self):
         """Method that deals with sending OACK datagrams on the wire."""

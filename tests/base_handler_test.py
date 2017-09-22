@@ -354,7 +354,7 @@ class testSessionHandler(unittest.TestCase):
         self.assertEqual(
             self.handler._stats.error, {
                 'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout after 2 retransmits'
+                'error_message': 'timeout after 2 retransmits.'
             }
         )
         self.assertTrue(self.handler._should_stop)
@@ -415,8 +415,9 @@ class testSessionHandler(unittest.TestCase):
     def testTransmitData(self):
         # we have tested sending data so here we should just test the edge case
         # where there is no more data to send
-        self.handler._current_block = None
+        self.handler._current_block = b''
         self.handler._transmit_data()
+        self.handler._handle_ack(0)
         self.assertTrue(self.handler._should_stop)
 
     def testTransmitOACK(self):
