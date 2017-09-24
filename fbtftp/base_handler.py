@@ -352,7 +352,7 @@ class BaseHandler(multiprocessing.Process):
             self._global_retransmits += 1
             return
 
-        error_msg = f'timeout after {self._retransmits} retransmits.'
+        error_msg = 'timeout after {} retransmits.'.format(self._retransmits)
         if self._waiting_last_ack:
             error_msg += ' Missed last ack.'
 
