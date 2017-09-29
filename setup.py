@@ -22,7 +22,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='fbtftp',
-    version='0.1',
+    version='0.2',
     description="A python3 framework to build dynamic TFTP servers",
     long_description=long_description,
     author='Angelo Failla',
