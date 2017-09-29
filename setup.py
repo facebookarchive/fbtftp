@@ -28,8 +28,13 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
+<<<<<<< HEAD
     name="fbtftp",
     version="0.2",
+=======
+    name='fbtftp',
+    version='0.2',
+>>>>>>> cutting version 0.2
     description="A python3 framework to build dynamic TFTP servers",
     long_description=long_description,
     author="Angelo Failla",
