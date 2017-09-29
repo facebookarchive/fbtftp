@@ -6,6 +6,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
+from collections import OrderedDict
 from unittest.mock import patch, Mock, call
 from fbtftp.netascii import NetasciiReader
 import socket
@@ -33,7 +34,7 @@ class MockHandler(BaseHandler):
         path,
         options,
         stats_callback,
-        network_queue=[]
+        network_queue=()
     ):
         self.response = StringResponseData("foo")
         super().__init__(server_addr, peer, path, options, stats_callback)
@@ -54,14 +55,14 @@ class MockHandler(BaseHandler):
 
 class testSessionHandler(unittest.TestCase):
     def setUp(self):
-        self.options = {
-            'default_timeout': 10,
-            'retries': 2,
-            'mode': 'netascii',
-            'blksize': 1492,
-            'tsize': 0,
-            'timeout': 99
-        }
+        self.options = OrderedDict([
+            ('default_timeout', 10),
+            ('retries', 2),
+            ('mode', 'netascii'),
+            ('blksize', 1492),
+            ('tsize', 0),
+            ('timeout', 99)
+        ])
 
         self.server_addr = ('127.0.0.1', 1234)
         self.peer = ('127.0.0.1', 5678)
@@ -297,12 +298,9 @@ class testSessionHandler(unittest.TestCase):
             side_effect=socket.timeout()
         )
         self.handler.on_new_data()
-        self.assertTrue(self.handler._should_stop)
+        self.assertFalse(self.handler._should_stop)
         self.assertEqual(
-            self.handler._stats.error, {
-                'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout occurred on socket.recvfrom()'
-            }
+            self.handler._stats.error, {}
         )
 
     def testOnNewDataDifferentPeer(self):
@@ -334,16 +332,12 @@ class testSessionHandler(unittest.TestCase):
             }
         )
 
-    def testHandleAck(self):
+    def testHandleUnexpectedAck(self):
         self.handler._last_block_sent = 1
-        self.handler._handle_timeout = Mock()
+        self.handler._reset_timeout = Mock()
         self.handler._next_block = Mock()
         self.handler._handle_ack(2)
-        self.handler._handle_timeout.assert_called_with()
-
-        self.handler._stats.packets_acked = 2
-        self.handler._handle_ack(1)
-        self.assertEqual(self.handler._stats.packets_acked, 3)
+        self.handler._reset_timeout.assert_not_called()
 
     def testHandleTimeout(self):
         self.handler._retries = 3
@@ -360,7 +354,7 @@ class testSessionHandler(unittest.TestCase):
         self.assertEqual(
             self.handler._stats.error, {
                 'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout after 2 retransmits'
+                'error_message': 'timeout after 2 retransmits.'
             }
         )
         self.assertTrue(self.handler._should_stop)
@@ -421,8 +415,9 @@ class testSessionHandler(unittest.TestCase):
     def testTransmitData(self):
         # we have tested sending data so here we should just test the edge case
         # where there is no more data to send
-        self.handler._current_block = None
+        self.handler._current_block = b''
         self.handler._transmit_data()
+        self.handler._handle_ack(0)
         self.assertTrue(self.handler._should_stop)
 
     def testTransmitOACK(self):

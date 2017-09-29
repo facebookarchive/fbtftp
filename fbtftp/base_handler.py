@@ -6,6 +6,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
+from collections import OrderedDict
 import io
 import ipaddress
 import logging
@@ -114,8 +115,10 @@ class BaseHandler(multiprocessing.Process):
         self._block_size = constants.DEFAULT_BLKSIZE
         self._last_block_sent = 0
         self._retransmits = 0
+        self._global_retransmits = 0
         self._current_block = None
         self._should_stop = False
+        self._waiting_last_ack = False
         self._path = path
         self._options = options
         self._stats_callback = stats_callback
@@ -162,7 +165,7 @@ class BaseHandler(multiprocessing.Process):
         This method sets number of retransmissions and calls the stats callback
         at the end of the session.
         """
-        self._stats.retransmits = self._retransmits
+        self._stats.retransmits = self._global_retransmits
         self._stats_callback(self._stats)
 
     def _close(self, test=False):
@@ -192,7 +195,7 @@ class BaseHandler(multiprocessing.Process):
         Method that deals with parsing/validation options provided by the
         client.
         """
-        opts_to_ack = {}
+        opts_to_ack = OrderedDict()
         # We remove retries and default_timeout from self._options because
         # we don't need to include them in the OACK response to the client.
         # Their value is already hold in self._retries and self._timeout.
@@ -214,16 +217,21 @@ class BaseHandler(multiprocessing.Process):
             self._transmit_error()
             self._close()
             return  # no way anything else will succeed now
-        if 'blksize' in self._options:
-            opts_to_ack['blksize'] = self._options['blksize']
-            self._block_size = int(self._options['blksize'])
-        if 'tsize' in self._options:
-            self._tsize = self._response_data.size()
-            if self._tsize is not None:
-                opts_to_ack['tsize'] = str(self._tsize)
-        if 'timeout' in self._options:
-            opts_to_ack['timeout'] = self._options['timeout']
-            self._timeout = int(opts_to_ack['timeout'])
+        # Let's ack the options in the same order we got asked for them
+        # The RFC mentions that option order is not significant, but it can't
+        # hurt. This relies on Python 3.6 dicts to be ordered.
+        for k, v in self._options.items():
+            if k == 'blksize':
+                opts_to_ack['blksize'] = v
+                self._block_size = int(v)
+            if k == 'tsize':
+                self._tsize = self._response_data.size()
+                if self._tsize is not None:
+                    opts_to_ack['tsize'] = str(self._tsize)
+            if k == 'timeout':
+                opts_to_ack['timeout'] = v
+                self._timeout = int(v)
+
         self._options = opts_to_ack  # only ACK options we can handle
         logging.info(
             'Options to ack for peer {}:  {}'.format(
@@ -286,11 +294,6 @@ class BaseHandler(multiprocessing.Process):
             data, peer = listener.recvfrom(constants.DEFAULT_BLKSIZE)
             listener.settimeout(None)
         except socket.timeout:
-            self._stats.error = {
-                'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout occurred on socket.recvfrom()',
-            }
-            self._should_stop = True
             return
         if peer != self._peer:
             logging.error(
@@ -329,31 +332,33 @@ class BaseHandler(multiprocessing.Process):
 
     def _handle_ack(self, block_number):
         """Deals with a client ACK packet."""
+
         if block_number != self._last_block_sent:
-            # Unexpected ACK, let's handle this as a timeout, and resend the
-            # current block
-            logging.error(
-                "Unexpected ACK, let's handle this as a timeout, and resend "
-                "the current block"
-            )
-            self._handle_timeout()
+            # Unexpected ACK, let's ignore this.
             return
         self._reset_timeout()
         self._retransmits = 0
         self._stats.packets_acked += 1
+        if self._waiting_last_ack:
+            self._should_stop = True
+            return
         self._next_block()
         self._transmit_data()
 
     def _handle_timeout(self):
-        self._stats.error = {}
         if self._retries >= self._retransmits:
             self._transmit_data()
             self._retransmits += 1
+            self._global_retransmits += 1
             return
+
+        error_msg = 'timeout after {} retransmits.'.format(self._retransmits)
+        if self._waiting_last_ack:
+            error_msg += ' Missed last ack.'
+
         self._stats.error = {
             'error_code': constants.ERR_UNDEFINED,
-            'error_message':
-            'timeout after %d retransmits' % self._retransmits,
+            'error_message': error_msg,
         }
         self._should_stop = True
         logging.error(self._stats.error['error_message'])
@@ -388,9 +393,6 @@ class BaseHandler(multiprocessing.Process):
 
     def _transmit_data(self):
         """Method that deals with sending a block to the wire."""
-        if self._current_block is None:
-            self._should_stop = True
-            return
         fmt = '!HH%ds' % len(self._current_block)
         packet = struct.pack(
             fmt, constants.OPCODE_DATA, self._last_block_sent,
@@ -400,7 +402,7 @@ class BaseHandler(multiprocessing.Process):
         self._stats.packets_sent += 1
         self._stats.bytes_sent += len(self._current_block)
         if len(self._current_block) < self._block_size:
-            self._should_stop = True
+            self._waiting_last_ack = True
 
     def _transmit_oack(self):
         """Method that deals with sending OACK datagrams on the wire."""
