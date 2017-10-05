@@ -393,6 +393,11 @@ class BaseHandler(multiprocessing.Process):
 
     def _transmit_data(self):
         """Method that deals with sending a block to the wire."""
+
+        if self._current_block is None:
+            self._transmit_oack()
+            return
+
         fmt = '!HH%ds' % len(self._current_block)
         packet = struct.pack(
             fmt, constants.OPCODE_DATA, self._last_block_sent,
