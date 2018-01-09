@@ -330,10 +330,6 @@ class BaseServer:
             proc = self.get_handler(
                 (self._address, self._port), peer, path, options
             )
-            if proc is None:
-                logging.warning(
-                    'The handler is null! Not serving the request from %s', peer)
-                return
             proc.daemon = True
             proc.start()
         except Exception as e:
