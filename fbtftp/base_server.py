@@ -332,7 +332,8 @@ class BaseServer:
             )
             if proc is None:
                 logging.warning(
-                    'The handler is null! Not serving the request from %s', peer)
+                    'The handler is null! Not serving the request from %s',
+                    peer)
                 return
             proc.daemon = True
             proc.start()
