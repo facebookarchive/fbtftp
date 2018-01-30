@@ -32,7 +32,7 @@ class testNetAsciiReader(unittest.TestCase):
 
     def testNetAsciiReaderBig(self):
         input_content = "I\nlike\ncrunchy\nbacon\n"
-        for i in range(5):
+        for _ in range(5):
             input_content += input_content
         resp_data = StringResponseData(input_content)
         n = NetasciiReader(resp_data)

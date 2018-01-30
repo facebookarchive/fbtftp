@@ -122,7 +122,7 @@ class testBaseServer(unittest.TestCase):
         )
         server.restart_stats_timer(run_once=True)
         # wait for the stats callback to be executed
-        for i in range(10):
+        for _ in range(10):
             import time
             time.sleep(1)
             if stats_callback.mock_called:
