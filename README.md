@@ -137,6 +137,13 @@ from fbtftp.base_server import BaseServer
 
 import os
 
+ip = '0.0.0.0'
+port = 1069
+retries = 3
+timeout = 5
+root = '/var/tftproot'
+
+
 class FileResponseData(ResponseData):
     def __init__(self, path):
         self._size = os.stat(path).st_size
@@ -180,8 +187,8 @@ class StaticServer(BaseServer):
             self._handler_stats_callback)
 
 def main():
-    server = StaticServer(ip='', port='1069', retries=3, timeout=5,
-                          root='/var/tftproot', print_session_stats,
+    server = StaticServer(ip, port, retries, timeout,
+                          root, print_session_stats,
                           print_server_stats)
     try:
         server.run()
