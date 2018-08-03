@@ -17,7 +17,7 @@ from fbtftp.base_server import BaseServer
 class FileResponseData(ResponseData):
     def __init__(self, path):
         self._size = os.stat(path).st_size
-        self._reader = open(path, 'rb')
+        self._reader = open(path, "rb")
 
     def read(self, n):
         return self._reader.read(n)
@@ -30,31 +30,31 @@ class FileResponseData(ResponseData):
 
 
 def print_session_stats(stats):
-    logging.info('Stats: for %r requesting %r' % (stats.peer, stats.file_path))
-    logging.info('Error: %r' % stats.error)
-    logging.info('Time spent: %dms' % (stats.duration() * 1e3))
-    logging.info('Packets sent: %d' % stats.packets_sent)
-    logging.info('Packets ACKed: %d' % stats.packets_acked)
-    logging.info('Bytes sent: %d' % stats.bytes_sent)
-    logging.info('Options: %r' % stats.options)
-    logging.info('Blksize: %r' % stats.blksize)
-    logging.info('Retransmits: %d' % stats.retransmits)
-    logging.info('Server port: %d' % stats.server_addr[1])
-    logging.info('Client port: %d' % stats.peer[1])
+    logging.info("Stats: for %r requesting %r" % (stats.peer, stats.file_path))
+    logging.info("Error: %r" % stats.error)
+    logging.info("Time spent: %dms" % (stats.duration() * 1e3))
+    logging.info("Packets sent: %d" % stats.packets_sent)
+    logging.info("Packets ACKed: %d" % stats.packets_acked)
+    logging.info("Bytes sent: %d" % stats.bytes_sent)
+    logging.info("Options: %r" % stats.options)
+    logging.info("Blksize: %r" % stats.blksize)
+    logging.info("Retransmits: %d" % stats.retransmits)
+    logging.info("Server port: %d" % stats.server_addr[1])
+    logging.info("Client port: %d" % stats.peer[1])
 
 
 def print_server_stats(stats):
-    '''
+    """
     Print server stats - see the ServerStats class
-    '''
+    """
     # NOTE: remember to reset the counters you use, to allow the next cycle to
     #       start fresh
     counters = stats.get_and_reset_all_counters()
-    logging.info('Server stats - every %d seconds' % stats.interval)
-    if 'process_count' in counters:
+    logging.info("Server stats - every %d seconds" % stats.interval)
+    if "process_count" in counters:
         logging.info(
-            'Number of spawned TFTP workers in stats time frame : %d' %
-            counters['process_count']
+            "Number of spawned TFTP workers in stats time frame : %d"
+            % counters["process_count"]
         )
 
 
@@ -76,7 +76,7 @@ class StaticServer(BaseServer):
         timeout,
         root,
         handler_stats_callback,
-        server_stats_callback=None
+        server_stats_callback=None,
     ):
         self._root = root
         self._handler_stats_callback = handler_stats_callback
@@ -84,42 +84,22 @@ class StaticServer(BaseServer):
 
     def get_handler(self, server_addr, peer, path, options):
         return StaticHandler(
-            server_addr, peer, path, options, self._root,
-            self._handler_stats_callback
+            server_addr, peer, path, options, self._root, self._handler_stats_callback
         )
 
 
 def get_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--ip", type=str, default="::", help="IP address to bind to")
+    parser.add_argument("--port", type=int, default=1969, help="port to bind to")
     parser.add_argument(
-        '--ip',
-        type=str,
-        default='::',
-        help='IP address to bind to'
+        "--retries", type=int, default=5, help="number of per-packet retries"
     )
     parser.add_argument(
-        '--port',
-        type=int,
-        default=1969,
-        help='port to bind to'
+        "--timeout_s", type=int, default=2, help="timeout for packet retransmission"
     )
     parser.add_argument(
-        '--retries',
-        type=int,
-        default=5,
-        help='number of per-packet retries'
-    )
-    parser.add_argument(
-        '--timeout_s',
-        type=int,
-        default=2,
-        help='timeout for packet retransmission'
-    )
-    parser.add_argument(
-        '--root',
-        type=str,
-        default='',
-        help='root of the static filesystem'
+        "--root", type=str, default="", help="root of the static filesystem"
     )
     return parser.parse_args()
 
@@ -142,5 +122,5 @@ def main():
         server.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

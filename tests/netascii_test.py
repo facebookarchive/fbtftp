@@ -16,10 +16,14 @@ class testNetAsciiReader(unittest.TestCase):
     def testNetAsciiReader(self):
         tests = [
             # content, expected output
-            ("foo\nbar\nand another\none",
-             bytearray(b'foo\r\nbar\r\nand another\r\none')),
-            ("foo\r\nbar\r\nand another\r\none",
-             bytearray(b'foo\r\x00\r\nbar\r\x00\r\nand another\r\x00\r\none')),
+            (
+                "foo\nbar\nand another\none",
+                bytearray(b"foo\r\nbar\r\nand another\r\none"),
+            ),
+            (
+                "foo\r\nbar\r\nand another\r\none",
+                bytearray(b"foo\r\x00\r\nbar\r\x00\r\nand another\r\x00\r\none"),
+            ),
         ]
         for input_content, expected in tests:
             with self.subTest(content=input_content):
@@ -45,5 +49,5 @@ class testNetAsciiReader(unittest.TestCase):
             output += c
             if len(c) < block_size:
                 break
-        self.assertEqual(input_content.count('\n'), output.count(b'\r\n'))
+        self.assertEqual(input_content.count("\n"), output.count(b"\r\n"))
         n.close()

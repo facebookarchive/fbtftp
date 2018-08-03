@@ -160,7 +160,7 @@ class BaseServer:
         retries,
         timeout,
         server_stats_callback=None,
-        stats_interval_seconds=constants.DATAPOINTS_INTERVAL_SECONDS
+        stats_interval_seconds=constants.DATAPOINTS_INTERVAL_SECONDS,
     ):
         """
         This base class implements the process which deals with accepting new
@@ -202,9 +202,7 @@ class BaseServer:
         self._server_stats_callback = server_stats_callback
         # the format of the peer tuple is different for v4 and v6
         self._family = socket.AF_INET6
-        if isinstance(
-            ipaddress.ip_address(self._address), ipaddress.IPv4Address
-        ):
+        if isinstance(ipaddress.ip_address(self._address), ipaddress.IPv4Address):
             self._family = socket.AF_INET
         self._listener = socket.socket(self._family, socket.SOCK_DGRAM)
         self._listener.setblocking(0)  # non-blocking
@@ -241,7 +239,7 @@ class BaseServer:
         for the callback, only if run_once is False (this is used only in unit
         tests).
         """
-        logging.debug('Running the metrics callback')
+        logging.debug("Running the metrics callback")
         try:
             self._server_stats_callback(self._server_stats)
         except Exception as exc:
@@ -255,17 +253,16 @@ class BaseServer:
         """
         if self._server_stats_callback is None:
             logging.warning(
-                'No callback specified for server statistics '
-                'logging, will continue without'
+                "No callback specified for server statistics "
+                "logging, will continue without"
             )
             return
         self._metrics_timer = threading.Timer(
-            self._server_stats.interval, self._metrics_callback_wrapper,
-            [run_once]
+            self._server_stats.interval, self._metrics_callback_wrapper, [run_once]
         )
         logging.debug(
-            'Starting the metrics callback in {sec}s'.format(
-                sec=self._server_stats.interval,
+            "Starting the metrics callback in {sec}s".format(
+                sec=self._server_stats.interval
             )
         )
         self._metrics_timer.start()
@@ -296,29 +293,29 @@ class BaseServer:
         a `fork()`.
         """
         data, peer = self._listener.recvfrom(constants.DEFAULT_BLKSIZE)
-        code = struct.unpack('!H', data[:2])[0]
+        code = struct.unpack("!H", data[:2])[0]
         if code != constants.OPCODE_RRQ:
             logging.warning(
-                'unexpected TFTP opcode %d, expected %d' %
-                (code, constants.OPCODE_RRQ)
+                "unexpected TFTP opcode %d, expected %d" % (code, constants.OPCODE_RRQ)
             )
             return
 
         # extract options
-        tokens = list(filter(bool, data[2:].decode('latin-1').split('\x00')))
+        tokens = list(filter(bool, data[2:].decode("latin-1").split("\x00")))
         if len(tokens) < 2 or len(tokens) % 2 != 0:
             logging.error(
-                'Received malformed packet, ignoring '
-                '(tokens length: {tl})'.format(tl=len(tokens))
+                "Received malformed packet, ignoring "
+                "(tokens length: {tl})".format(tl=len(tokens))
             )
             return
 
         path = tokens[0]
-        options = collections.OrderedDict([
-            ('mode', tokens[1].lower()),
-            ('default_timeout', self._timeout),
-            ('retries', self._retries)
-        ]
+        options = collections.OrderedDict(
+            [
+                ("mode", tokens[1].lower()),
+                ("default_timeout", self._timeout),
+                ("retries", self._retries),
+            ]
         )
         pos = 2
         while pos < len(tokens):
@@ -327,24 +324,22 @@ class BaseServer:
 
         # fork a child process
         try:
-            proc = self.get_handler(
-                (self._address, self._port), peer, path, options
-            )
+            proc = self.get_handler((self._address, self._port), peer, path, options)
             if proc is None:
                 logging.warning(
-                    'The handler is null! Not serving the request from %s',
-                    peer)
+                    "The handler is null! Not serving the request from %s", peer
+                )
                 return
             proc.daemon = True
             proc.start()
         except Exception as e:
             logging.error(
-                'creating a handler for %r raised an exception %s' % (path, e)
+                "creating a handler for %r raised an exception %s" % (path, e)
             )
             logging.error(traceback.format_exc())
 
         # Increment number of spawned TFTP workers in stats time frame
-        self._server_stats.increment_counter('process_count')
+        self._server_stats.increment_counter("process_count")
 
     def get_handler(self, server_addr, peer, path, options):
         """

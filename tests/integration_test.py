@@ -21,7 +21,7 @@ from fbtftp.base_server import BaseServer
 class FileResponseData(ResponseData):
     def __init__(self, path):
         self._size = os.stat(path).st_size
-        self._reader = open(path, 'rb')
+        self._reader = open(path, "rb")
 
     def read(self, n):
         return self._reader.read(n)
@@ -58,16 +58,16 @@ def busyboxClient(filename, blksize=1400, port=1069):
     # We use busybox cli to test various bulksizes
     p = subprocess.Popen(
         [
-            find_executable('busybox'),
-            'tftp',
-            '-l',
-            '/dev/stdout',
-            '-r',
+            find_executable("busybox"),
+            "tftp",
+            "-l",
+            "/dev/stdout",
+            "-r",
             filename,
-            '-g',
-            '-b',
+            "-g",
+            "-b",
             str(blksize),
-            'localhost',
+            "localhost",
             str(port),
         ],
         stdout=subprocess.PIPE,
@@ -78,9 +78,8 @@ def busyboxClient(filename, blksize=1400, port=1069):
 
 
 @unittest.skipUnless(
-    find_executable('busybox'),
-    'busybox binary not present, install it if you want to run '
-    'integration tests'
+    find_executable("busybox"),
+    "busybox binary not present, install it if you want to run " "integration tests",
 )
 class integrationTest(unittest.TestCase):
     def setUp(self):
@@ -89,9 +88,9 @@ class integrationTest(unittest.TestCase):
         self.tmpdirname = tempfile.TemporaryDirectory()
         logging.info("Created temporary directory %s" % self.tmpdirname)
 
-        self.tmpfile = '%s/%s' % (self.tmpdirname.name, 'test.file')
+        self.tmpfile = "%s/%s" % (self.tmpdirname.name, "test.file")
         self.tmpfile_data = os.urandom(512 * 5)
-        with open(self.tmpfile, 'wb') as fout:
+        with open(self.tmpfile, "wb") as fout:
             fout.write(self.tmpfile_data)
 
         self.called_stats_times = 0
@@ -101,15 +100,13 @@ class integrationTest(unittest.TestCase):
 
     def stats(self, data):
         logging.debug("Inside stats function")
-        self.assertEqual(data.peer[0], '127.0.0.1')
+        self.assertEqual(data.peer[0], "127.0.0.1")
         self.assertEqual(data.file_path, self.tmpfile)
         self.assertEqual({}, data.error)
         self.assertGreater(data.start_time, 0)
         self.assertTrue(data.packets_acked == data.packets_sent - 1)
         self.assertEqual(2560, data.bytes_sent)
-        self.assertEqual(
-            round(data.bytes_sent / self.blksize), data.packets_sent - 1
-        )
+        self.assertEqual(round(data.bytes_sent / self.blksize), data.packets_sent - 1)
         self.assertEqual(0, data.retransmits)
         self.assertEqual(self.blksize, data.blksize)
         self.called_stats_times += 1
@@ -118,12 +115,12 @@ class integrationTest(unittest.TestCase):
         for b in (512, 1400):
             self.blksize = b
             server = StaticServer(
-                '::',
+                "::",
                 0,  # let the kernel decide the port
                 2,
                 2,
                 self.tmpdirname.name,
-                self.stats
+                self.stats,
             )
             child_pid = os.fork()
             if child_pid:
@@ -133,7 +130,7 @@ class integrationTest(unittest.TestCase):
                         self.tmpfile,
                         blksize=self.blksize,
                         # use the port chosen for the server by the kernel
-                        port=server._listener.getsockname()[1]
+                        port=server._listener.getsockname()[1],
                     )
                     self.assertEqual(0, p_returncode)
                     if p_returncode != 0:
