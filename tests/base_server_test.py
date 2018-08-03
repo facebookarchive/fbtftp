@@ -21,7 +21,7 @@ class MockSocketListener:
 
     def recvfrom(self, blocksize):
         data = self._network_queue.pop(0)
-        peer = '::1'  # assuming v6, but this is invariant for this test
+        peer = "::1"  # assuming v6, but this is invariant for this test
         return data, peer
 
     def fileno(self):
@@ -36,8 +36,15 @@ class MockSocketListener:
 
 class StaticServer(BaseServer):
     def __init__(
-        self, address, port, retries, timeout, root, stats_callback,
-        stats_interval, network_queue
+        self,
+        address,
+        port,
+        retries,
+        timeout,
+        root,
+        stats_callback,
+        stats_interval,
+        network_queue,
     ):
         super().__init__(
             address, port, retries, timeout, stats_callback, stats_interval
@@ -60,7 +67,7 @@ class StaticServer(BaseServer):
 
 class testBaseServer(unittest.TestCase):
     def setUp(self):
-        self.host = '::'  # assuming v6, but this is invariant for this test
+        self.host = "::"  # assuming v6, but this is invariant for this test
         self.port = 0  # let the kernel choose
         self.timeout = 100
         self.retries = 200
@@ -79,8 +86,14 @@ class testBaseServer(unittest.TestCase):
 
     def prepare_and_run(self, network_queue):
         server = StaticServer(
-            self.host, self.port, self.retries, self.timeout, None, Mock(),
-            self.interval, self.network_queue
+            self.host,
+            self.port,
+            self.retries,
+            self.timeout,
+            None,
+            Mock(),
+            self.interval,
+            self.network_queue,
         )
         server._server_stats.increment_counter = Mock()
         server.run(run_once=True)
@@ -88,45 +101,51 @@ class testBaseServer(unittest.TestCase):
         self.assertTrue(server._should_stop)
         self.assertTrue(server._handler.daemon)
         server._handler.start.assert_called_with()
-        self.assertEqual(server._handler.addr, ('::', 0))
-        self.assertEqual(server._handler.peer, '::1')
-        server._server_stats.increment_counter.assert_called_with(
-            'process_count'
-        )
+        self.assertEqual(server._handler.addr, ("::", 0))
+        self.assertEqual(server._handler.peer, "::1")
+        server._server_stats.increment_counter.assert_called_with("process_count")
         return server._handler
 
-    @patch('select.epoll')
+    @patch("select.epoll")
     def testRRQ(self, epoll_mock):
         # link the self.poll_mock() method with the select.epoll patched object
         epoll_mock.return_value.poll.side_effect = self.poll_mock
         self.network_queue = [
             # RRQ + file name + mode + optname + optvalue
-            b'\x00\x01some_file\x00binascii\x00opt1_key\x00opt1_val\x00',
+            b"\x00\x01some_file\x00binascii\x00opt1_key\x00opt1_val\x00"
         ]
         handler = self.prepare_and_run(self.network_queue)
 
-        self.assertEqual(handler.path, 'some_file')
+        self.assertEqual(handler.path, "some_file")
         self.assertEqual(
-            handler.options, {
-                'default_timeout': 100,
-                'mode': 'binascii',
-                'opt1_key': 'opt1_val',
-                'retries': 200
-            }
+            handler.options,
+            {
+                "default_timeout": 100,
+                "mode": "binascii",
+                "opt1_key": "opt1_val",
+                "retries": 200,
+            },
         )
 
     def start_timer_and_wait_for_callback(self, stats_callback):
         server = StaticServer(
-            self.host, self.port, self.retries, self.timeout, None,
-            stats_callback, self.interval, []
+            self.host,
+            self.port,
+            self.retries,
+            self.timeout,
+            None,
+            stats_callback,
+            self.interval,
+            [],
         )
         server.restart_stats_timer(run_once=True)
         # wait for the stats callback to be executed
-        for i in range(10):
+        for _ in range(10):
             import time
+
             time.sleep(1)
             if stats_callback.mock_called:
-                print('Stats callback executed')
+                print("Stats callback executed")
                 break
         server._metrics_timer.cancel()
 
@@ -137,28 +156,40 @@ class testBaseServer(unittest.TestCase):
     def testTimerNoCallBack(self):
         stats_callback = None
         server = StaticServer(
-            self.host, self.port, self.retries, self.timeout, None,
-            stats_callback, self.interval, []
+            self.host,
+            self.port,
+            self.retries,
+            self.timeout,
+            None,
+            stats_callback,
+            self.interval,
+            [],
         )
         ret = server.restart_stats_timer(run_once=True)
         self.assertIsNone(ret)
 
     def testCallbackException(self):
         stats_callback = Mock()
-        stats_callback.side_effect = Exception('boom!')
+        stats_callback.side_effect = Exception("boom!")
         self.start_timer_and_wait_for_callback(stats_callback)
 
-    @patch('select.epoll')
+    @patch("select.epoll")
     def testUnexpectedOpsCode(self, epoll_mock):
         # link the self.poll_mock() emthod with the select.epoll patched object
         epoll_mock.return_value.poll.side_effect = self.poll_mock
         self.network_queue = [
             # RRQ + file name + mode + optname + optvalue
-            b'\x00\xffsome_file\x00binascii\x00opt1_key\x00opt1_val\x00',
+            b"\x00\xffsome_file\x00binascii\x00opt1_key\x00opt1_val\x00"
         ]
         server = StaticServer(
-            self.host, self.port, self.retries, self.timeout, None, Mock(),
-            self.interval, self.network_queue
+            self.host,
+            self.port,
+            self.retries,
+            self.timeout,
+            None,
+            Mock(),
+            self.interval,
+            self.network_queue,
         )
         server.run(run_once=True)
         self.assertIsNone(server._handler)

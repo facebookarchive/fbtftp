@@ -15,8 +15,8 @@ OPCODE_ERROR = 5
 OPCODE_OACK = 6
 
 # TFTP modes (encodings)
-MODE_NETASCII = 'netascii'
-MODE_BINARY = 'octet'
+MODE_NETASCII = "netascii"
+MODE_BINARY = "octet"
 
 # TFTP error codes
 ERR_UNDEFINED = 0  # Not defined, see error msg (if any) - RFC 1350.

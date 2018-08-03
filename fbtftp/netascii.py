@@ -36,10 +36,10 @@ class NetasciiReader:
             buffer_size = len(self._buffer)
             data.extend(self._buffer)
         for char in self._reader.read(size - buffer_size):
-            if char == ord('\n'):
-                data.extend([ord('\r'), ord('\n')])
-            elif char == ord('\r'):
-                data.extend([ord('\r'), 0])
+            if char == ord("\n"):
+                data.extend([ord("\r"), ord("\n")])
+            elif char == ord("\r"):
+                data.extend([ord("\r"), 0])
             else:
                 data.append(char)
         self._buffer = bytearray(data[size:])

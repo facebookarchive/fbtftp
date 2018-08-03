@@ -28,13 +28,7 @@ class MockSocketListener:
 
 class MockHandler(BaseHandler):
     def __init__(
-        self,
-        server_addr,
-        peer,
-        path,
-        options,
-        stats_callback,
-        network_queue=()
+        self, server_addr, peer, path, options, stats_callback, network_queue=()
     ):
         self.response = StringResponseData("foo")
         super().__init__(server_addr, peer, path, options, stats_callback)
@@ -55,21 +49,23 @@ class MockHandler(BaseHandler):
 
 class testSessionHandler(unittest.TestCase):
     def setUp(self):
-        self.options = OrderedDict([
-            ('default_timeout', 10),
-            ('retries', 2),
-            ('mode', 'netascii'),
-            ('blksize', 1492),
-            ('tsize', 0),
-            ('timeout', 99)
-        ])
+        self.options = OrderedDict(
+            [
+                ("default_timeout", 10),
+                ("retries", 2),
+                ("mode", "netascii"),
+                ("blksize", 1492),
+                ("tsize", 0),
+                ("timeout", 99),
+            ]
+        )
 
-        self.server_addr = ('127.0.0.1', 1234)
-        self.peer = ('127.0.0.1', 5678)
+        self.server_addr = ("127.0.0.1", 1234)
+        self.peer = ("127.0.0.1", 5678)
         self.handler = MockHandler(
             server_addr=self.server_addr,
             peer=self.peer,
-            path='want/bacon/file',
+            path="want/bacon/file",
             options=self.options,
             stats_callback=self.stats_callback,
         )
@@ -79,15 +75,15 @@ class testSessionHandler(unittest.TestCase):
 
     def init(self, universe=4):
         if universe == 4:
-            server_addr = ('127.0.0.1', 1234)
-            peer = ('127.0.0.1', 5678)
+            server_addr = ("127.0.0.1", 1234)
+            peer = ("127.0.0.1", 5678)
         else:
-            server_addr = ('::1', 1234)
-            peer = ('::1', 5678)
+            server_addr = ("::1", 1234)
+            peer = ("::1", 5678)
         handler = BaseHandler(
             server_addr=server_addr,
             peer=peer,
-            path='want/bacon/file',
+            path="want/bacon/file",
             options=self.options,
             stats_callback=self.stats_callback,
         )
@@ -101,7 +97,7 @@ class testSessionHandler(unittest.TestCase):
         self.assertEqual(handler._retransmits, 0)
         self.assertEqual(handler._current_block, None)
         self.assertEqual(handler._should_stop, False)
-        self.assertEqual(handler._path, 'want/bacon/file')
+        self.assertEqual(handler._path, "want/bacon/file")
         self.assertEqual(handler._options, self.options)
         self.assertEqual(handler._stats_callback, self.stats_callback)
         self.assertEqual(handler._peer, peer)
@@ -118,101 +114,87 @@ class testSessionHandler(unittest.TestCase):
         self.init(universe=4)
 
     def testResponseDataException(self):
-        server_addr = ('127.0.0.1', 1234)
-        peer = ('127.0.0.1', 5678)
-        with patch.object(MockHandler, 'get_response_data') as mock:
-            mock.side_effect = Exception('boom!')
+        server_addr = ("127.0.0.1", 1234)
+        peer = ("127.0.0.1", 5678)
+        with patch.object(MockHandler, "get_response_data") as mock:
+            mock.side_effect = Exception("boom!")
             handler = MockHandler(
                 server_addr=server_addr,
                 peer=peer,
-                path='want/bacon/file',
+                path="want/bacon/file",
                 options=self.options,
                 stats_callback=self.stats_callback,
             )
             self.assertEqual(
-                handler._stats.error, {
-                    'error_message': 'boom!',
-                    'error_code': 0
-                }
+                handler._stats.error, {"error_message": "boom!", "error_code": 0}
             )
 
     def testParseOptionsNetascii(self):
         self.handler._response_data = StringResponseData("foo\nbar\n")
         self.handler._parse_options()
         self.assertEqual(
-            self.handler._stats.options_in, {
-                'mode': 'netascii',
-                'blksize': 1492,
-                'tsize': 0,
-                'timeout': 99,
-            }
+            self.handler._stats.options_in,
+            {"mode": "netascii", "blksize": 1492, "tsize": 0, "timeout": 99},
         )
         self.assertIsInstance(self.handler._response_data, NetasciiReader)
         self.assertEqual(self.handler._stats.blksize, 1492)
 
         # options acked by the server don't include the mode
         expected_opts_to_ack = self.options
-        del expected_opts_to_ack['mode']
+        del expected_opts_to_ack["mode"]
         # tsize include the number of bytes in the response
-        expected_opts_to_ack['tsize'] = str(self.handler._response_data.size())
+        expected_opts_to_ack["tsize"] = str(self.handler._response_data.size())
         self.assertEqual(self.handler._stats.options, expected_opts_to_ack)
-        self.assertEqual(
-            self.handler._stats.options_acked, expected_opts_to_ack
-        )
-        self.assertEqual(
-            self.handler._tsize, int(expected_opts_to_ack['tsize'])
-        )
+        self.assertEqual(self.handler._stats.options_acked, expected_opts_to_ack)
+        self.assertEqual(self.handler._tsize, int(expected_opts_to_ack["tsize"]))
 
     def testParseOptionsBadMode(self):
         options = {
-            'default_timeout': 10,
-            'retries': 2,
-            'mode': 'IamBadAndIShoudlFeelBad',
-            'blksize': 1492,
-            'tsize': 0,
-            'timeout': 99
+            "default_timeout": 10,
+            "retries": 2,
+            "mode": "IamBadAndIShoudlFeelBad",
+            "blksize": 1492,
+            "tsize": 0,
+            "timeout": 99,
         }
         self.handler = MockHandler(
             server_addr=self.server_addr,
             peer=self.peer,
-            path='want/bacon/file',
+            path="want/bacon/file",
             options=options,
-            stats_callback=Mock()
+            stats_callback=Mock(),
         )
         self.handler._close = Mock()
         self.handler._parse_options()
         self.handler._close.assert_called_with()
         self.assertEqual(
-            self.handler._stats.error['error_code'],
-            constants.ERR_ILLEGAL_OPERATION
+            self.handler._stats.error["error_code"], constants.ERR_ILLEGAL_OPERATION
         )
         self.assertTrue(
-            self.handler._stats.error[
-                'error_message'
-            ].startswith('Unknown mode:')
+            self.handler._stats.error["error_message"].startswith("Unknown mode:")
         )
         self.handler._get_listener().sendto.assert_called_with(
             # \x00\x05 == OPCODE_ERROR
             # \x00\x04 == ERR_ILLEGAL_OPERATION
             b"\x00\x05\x00\x04Unknown mode: 'IamBadAndIShoudlFeelBad'\x00",
-            ('127.0.0.1', 5678)
+            ("127.0.0.1", 5678),
         )
 
     def testClose(self):
         options = {
-            'default_timeout': 10,
-            'retries': 2,
-            'mode': 'IamBadAndIShoudlFeelBad',
-            'blksize': 1492,
-            'tsize': 0,
-            'timeout': 99
+            "default_timeout": 10,
+            "retries": 2,
+            "mode": "IamBadAndIShoudlFeelBad",
+            "blksize": 1492,
+            "tsize": 0,
+            "timeout": 99,
         }
         self.handler = MockHandler(
             server_addr=self.server_addr,
             peer=self.peer,
-            path='want/bacon/file',
+            path="want/bacon/file",
             options=options,
-            stats_callback=Mock()
+            stats_callback=Mock(),
         )
 
         self.handler._retransmits = 100
@@ -222,7 +204,7 @@ class testSessionHandler(unittest.TestCase):
         self.handler._get_listener().close.assert_called_with()
         self.handler._response_data.close.assert_called_with()
         self.handler._on_close = Mock()
-        self.handler._on_close.side_effect = Exception('boom!')
+        self.handler._on_close.side_effect = Exception("boom!")
         self.handler._close(True)
 
     def testRun(self):
@@ -234,7 +216,7 @@ class testSessionHandler(unittest.TestCase):
         self.handler._transmit_data = Mock()
         self.handler._next_block = Mock()
 
-        self.handler._stats.error = {'error_message': 'boom!', 'error_code': 0}
+        self.handler._stats.error = {"error_message": "boom!", "error_code": 0}
         self.handler.run()
         self.handler._close.assert_called_with()
         self.handler._transmit_error.assert_called_with()
@@ -266,20 +248,16 @@ class testSessionHandler(unittest.TestCase):
         self.handler = MockHandler(
             server_addr=self.server_addr,
             peer=self.peer,
-            path='want/bacon/file',
+            path="want/bacon/file",
             options=self.options,
             stats_callback=self.stats_callback,
             # client acknolwedges DATA block 1, we expect to send DATA block 2
-            network_queue=[b'\x00\x04\x00\x01'],
+            network_queue=[b"\x00\x04\x00\x01"],
         )
         self.handler._last_block_sent = 1
         self.handler.on_new_data()
         self.handler._get_listener().settimeout.assert_has_calls(
-            [
-                call(
-                    self.handler._timeout
-                ), call(None)
-            ]
+            [call(self.handler._timeout), call(None)]
         )
         # data response sohuld look like this:
         #
@@ -289,47 +267,42 @@ class testSessionHandler(unittest.TestCase):
         #  ---------------------------------------
         self.handler._get_listener().sendto.assert_called_with(
             # client acknolwedges DATA block 1, we expect to send DATA block 2
-            b'\x00\x03\x00\x02foo',
-            ('127.0.0.1', 5678)
+            b"\x00\x03\x00\x02foo",
+            ("127.0.0.1", 5678),
         )
 
     def testOnNewDataTimeout(self):
-        self.handler._get_listener().recvfrom = Mock(
-            side_effect=socket.timeout()
-        )
+        self.handler._get_listener().recvfrom = Mock(side_effect=socket.timeout())
         self.handler.on_new_data()
         self.assertFalse(self.handler._should_stop)
-        self.assertEqual(
-            self.handler._stats.error, {}
-        )
+        self.assertEqual(self.handler._stats.error, {})
 
     def testOnNewDataDifferentPeer(self):
         self.handler._get_listener().recvfrom = Mock(
-            return_value=(b'data', ('1.2.3.4', '9999'))
+            return_value=(b"data", ("1.2.3.4", "9999"))
         )
         self.handler.on_new_data()
         self.assertTrue(self.handler._should_stop)
 
     def testOnNewDataOpCodeError(self):
-        error = b'\x00\x05\x00\x04some_error\x00'
-        self.handler._get_listener().recvfrom = Mock(
-            return_value=(error, self.peer)
-        )
+        error = b"\x00\x05\x00\x04some_error\x00"
+        self.handler._get_listener().recvfrom = Mock(return_value=(error, self.peer))
         self.handler.on_new_data()
         self.assertTrue(self.handler._should_stop)
         self.handler._get_listener().sendto.assert_called_with(error, self.peer)
 
     def testOnNewDataNoAck(self):
         self.handler._get_listener().recvfrom = Mock(
-            return_value=(b'\x00\x02\x00\x04', self.peer)
+            return_value=(b"\x00\x02\x00\x04", self.peer)
         )
         self.handler.on_new_data()
         self.assertTrue(self.handler._should_stop)
         self.assertEqual(
-            self.handler._stats.error, {
-                'error_code': constants.ERR_ILLEGAL_OPERATION,
-                'error_message': 'I only do reads, really'
-            }
+            self.handler._stats.error,
+            {
+                "error_code": constants.ERR_ILLEGAL_OPERATION,
+                "error_message": "I only do reads, really",
+            },
         )
 
     def testHandleUnexpectedAck(self):
@@ -352,10 +325,11 @@ class testSessionHandler(unittest.TestCase):
         self.handler._retransmits = 2
         self.handler._handle_timeout()
         self.assertEqual(
-            self.handler._stats.error, {
-                'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'timeout after 2 retransmits.'
-            }
+            self.handler._stats.error,
+            {
+                "error_code": constants.ERR_UNDEFINED,
+                "error_message": "timeout after 2 retransmits.",
+            },
         )
         self.assertTrue(self.handler._should_stop)
 
@@ -373,61 +347,62 @@ class testSessionHandler(unittest.TestCase):
         # single-packet file
         self.handler._last_block_sent = 0
         self.handler._block_size = 1400
-        self.handler._response_data = StringResponseData('bacon')
+        self.handler._response_data = StringResponseData("bacon")
         self.handler._next_block()
-        self.assertEqual(self.handler._current_block, b'bacon')
+        self.assertEqual(self.handler._current_block, b"bacon")
         self.assertEqual(self.handler._last_block_sent, 1)
 
         # multi-packet file
         self.handler._last_block_sent = 0
         self.handler._block_size = 1400
-        self.handler._response_data = StringResponseData('bacon' * 281)
+        self.handler._response_data = StringResponseData("bacon" * 281)
         self.handler._next_block()
-        self.assertEqual(self.handler._current_block, b'bacon' * 280)
+        self.assertEqual(self.handler._current_block, b"bacon" * 280)
         self.assertEqual(self.handler._last_block_sent, 1)
         self.handler._next_block()
-        self.assertEqual(self.handler._current_block, b'bacon')
+        self.assertEqual(self.handler._current_block, b"bacon")
         self.assertEqual(self.handler._last_block_sent, 2)
 
         # partial read
-        data = MockResponse(iter('bacon'))
+        data = MockResponse(iter("bacon"))
         self.handler._last_block_sent = 0
         self.handler._block_size = 1400
         self.handler._response_data.read = data.read
         self.handler._next_block()
-        self.assertEqual(self.handler._current_block, 'bacon')
+        self.assertEqual(self.handler._current_block, "bacon")
         self.assertEqual(self.handler._last_block_sent, 1)
 
         self.handler._last_block_sent = constants.MAX_BLOCK_NUMBER + 1
         self.handler._next_block()
         self.assertEqual(self.handler._last_block_sent, 0)
 
-        self.handler._response_data.read = Mock(side_effect=Exception('boom!'))
+        self.handler._response_data.read = Mock(side_effect=Exception("boom!"))
         self.handler._next_block()
         self.assertEqual(
-            self.handler._stats.error, {
-                'error_code': constants.ERR_UNDEFINED,
-                'error_message': 'Error while reading from source'
-            }
+            self.handler._stats.error,
+            {
+                "error_code": constants.ERR_UNDEFINED,
+                "error_message": "Error while reading from source",
+            },
         )
         self.assertTrue(self.handler._should_stop)
 
     def testTransmitData(self):
         # we have tested sending data so here we should just test the edge case
         # where there is no more data to send
-        self.handler._current_block = b''
+        self.handler._current_block = b""
         self.handler._transmit_data()
         self.handler._handle_ack(0)
         self.assertTrue(self.handler._should_stop)
 
     def testTransmitOACK(self):
-        self.handler._options = {'opt1': 'value1', }
+        self.handler._options = {"opt1": "value1"}
         self.handler._get_listener().sendto = Mock()
         self.handler._stats.packets_sent = 1
         self.handler._transmit_oack()
         self.assertEqual(self.handler._stats.packets_sent, 2)
         self.handler._get_listener().sendto.assert_called_with(
             # OACK code == 6
-            b'\x00\x06opt1\x00value1\x00',
-            ('127.0.0.1', 5678)
+            b"\x00\x06opt1\x00value1\x00",
+            ("127.0.0.1", 5678),
         )
