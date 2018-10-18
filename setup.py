@@ -45,6 +45,5 @@ setup(
     url="https://www.github.com/facebook/fbtftp",
     packages=find_packages(exclude=["tests"]),
     tests_require=["nose", "coverage", "mock"],
-    setup_requires=["flake8"],
     cmdclass={"test": NoseTestCommand},
 )
