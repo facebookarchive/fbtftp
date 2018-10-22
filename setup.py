@@ -1,3 +1,5 @@
+# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+
 from os import path
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand

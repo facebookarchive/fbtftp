@@ -198,3 +198,7 @@ if __name__ == '__main__':
 
 Other honorable contributors:
 * Andrea Barberio <barberio@fb.com>
+
+# License
+
+BSD License
