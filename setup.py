@@ -4,7 +4,8 @@
 # LICENSE file in the root directory of this source tree.
 
 from os import path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
 
 
@@ -44,7 +45,7 @@ setup(
         "Topic :: System :: Boot",
         "Topic :: Utilities",
         "Intended Audience :: Developers",
-    ]   ,
+    ],
     keywords="tftp daemon infrastructure provisioning netboot",
     url="https://www.github.com/facebook/fbtftp",
     packages=find_packages(exclude=["tests"]),
