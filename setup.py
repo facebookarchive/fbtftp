@@ -1,4 +1,7 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+# Copyright (c) Facebook, Inc. and its affiliates.
+
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
 
 from os import path
 from setuptools import setup, find_packages
@@ -33,7 +36,7 @@ setup(
     license="BSD",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: MIT icense",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.5",
@@ -41,8 +44,7 @@ setup(
         "Topic :: System :: Boot",
         "Topic :: Utilities",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
-    ],
+    ]   ,
     keywords="tftp daemon infrastructure provisioning netboot",
     url="https://www.github.com/facebook/fbtftp",
     packages=find_packages(exclude=["tests"]),

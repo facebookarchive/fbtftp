@@ -201,4 +201,4 @@ Other honorable contributors:
 
 # License
 
-BSD License
+MIT License
