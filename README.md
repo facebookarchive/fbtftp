@@ -28,7 +28,7 @@ difficult to extend.
   * can be a file created dynamically;
   * you name it!
 
-# How do you use `fbtftp` at Facebook?
+# How do we use `fbtftp` at Facebook?
 
 We created our own Facebook-specific server based on the framework to:
 
