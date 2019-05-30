@@ -60,7 +60,7 @@ The framework implements the following RFCs:
   Size Options).
 
 Note that the server framework only support RRQs (read only) operations.
-(Who uses WRQ TFTP requests in 2016? :P)
+(Who uses WRQ TFTP requests in 2019? :P)
 
 # How does it work?
 
