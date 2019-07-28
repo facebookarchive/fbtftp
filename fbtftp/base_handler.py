@@ -139,6 +139,12 @@ class BaseHandler(multiprocessing.Process):
 
         try:
             self._response_data = self.get_response_data()
+        except FileNotFoundError as e:
+            logging.warning(str(e))
+            self._stats.error = {
+                "error_code": constants.ERR_FILE_NOT_FOUND,
+                "error_message": str(e),
+            }
         except Exception as e:
             logging.exception("Caught exception: %s." % e)
             self._stats.error = {
