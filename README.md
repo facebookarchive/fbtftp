@@ -180,9 +180,10 @@ class StaticServer(BaseServer):
             self._handler_stats_callback)
 
 def main():
-    server = StaticServer(ip='', port='1069', retries=3, timeout=5,
-                          root='/var/tftproot', print_session_stats,
-                          print_server_stats)
+    server = StaticServer(ip='', port='1069', retries=3, timeout=5
+                          root='/var/tftproot', 
+                          handler_stats_callback=print_session_stats,
+                          server_stats_callback=print_server_stats)
     try:
         server.run()
     except KeyboardInterrupt:
