@@ -143,11 +143,7 @@ class testBaseServer(unittest.TestCase):
 
             time.sleep(1)
             if stats_callback.mock_called:
-<<<<<<< HEAD
                 print("Stats callback executed")
-=======
-                print('Stats callback executed')
->>>>>>> fixing flaky travisCI test runs
                 break
         server._metrics_timer.cancel()
 
