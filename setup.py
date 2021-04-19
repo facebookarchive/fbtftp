@@ -29,15 +29,16 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="fbtftp",
-    version="0.2",
+    version="0.4",
     description="A python3 framework to build dynamic TFTP servers",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Angelo Failla",
     author_email="pallotron@fb.com",
     license="BSD",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: MIT icense",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.5",
