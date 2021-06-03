@@ -3,8 +3,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  build:
-
+  build-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,3 +25,24 @@ jobs:
     - name: Test
       run: |
         make test
+
+  build-bsd:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: [ '3.5', '3.6', '3.7', '3.8', '3.9' ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies and prepare for test
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools --upgrade
+          python -m pip install flake8
+      - name: Test
+        run: |
+          make test
