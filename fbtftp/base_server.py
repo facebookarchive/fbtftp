@@ -7,7 +7,7 @@
 import collections
 import ipaddress
 import logging
-import select
+import selectors
 import socket
 import struct
 import threading
@@ -205,8 +205,8 @@ class BaseServer:
         self._listener = socket.socket(self._family, socket.SOCK_DGRAM)
         self._listener.setblocking(0)  # non-blocking
         self._listener.bind((address, port))
-        self._epoll = select.epoll()
-        self._epoll.register(self._listener.fileno(), select.EPOLLIN)
+        self._selector = selectors.DefaultSelector()
+        self._selector.register(self._listener, selectors.EVENT_READ)
         self._should_stop = False
         self._server_stats = ServerStats(address, stats_interval_seconds)
         self._metrics_timer = None
@@ -226,7 +226,7 @@ class BaseServer:
             self.run_once()
             if run_once:
                 break
-        self._epoll.close()
+        self._selector.close()
         self._listener.close()
         if self._metrics_timer is not None:
             self._metrics_timer.cancel()
@@ -271,11 +271,11 @@ class BaseServer:
         facility to know when data is ready to be retrived from the listening
         socket. See http://linux.die.net/man/4/epoll .
         """
-        events = self._epoll.poll()
-        for fileno, eventmask in events:
-            if not eventmask & select.EPOLLIN:
+        events = self._selector.select()
+        for key, mask in events:
+            if not mask & selectors.EVENT_READ:
                 continue
-            if fileno == self._listener.fileno():
+            if key.fd == self._listener.fileno():
                 self.on_new_data()
                 continue
 
