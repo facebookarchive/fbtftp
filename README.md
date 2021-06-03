@@ -101,7 +101,8 @@ and you are good to go:
 # Requirements
 
 * Linux (or any system that supports [`epoll`](http://linux.die.net/man/4/epoll))
-* Python 3.x
+* BSD (or any system that supports [`kqueue`](https://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2))
+* Python 3.4+
 
 # Installation
 
