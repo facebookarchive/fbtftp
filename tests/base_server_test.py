@@ -10,7 +10,7 @@ import unittest
 from fbtftp.base_server import BaseServer
 
 MOCK_SOCKET_FILENO = 100
-SELECT_EPOLLIN = 1
+SELECTORS_EVENT_READ = 1
 
 
 class MockSocketListener:
@@ -72,14 +72,16 @@ class testBaseServer(unittest.TestCase):
         self.interval = 1
         self.network_queue = []
 
-    def poll_mock(self):
+    def select_mock(self):
         """
         mock the select.epoll.poll() method, returns an iterable containing a
         list of (fileno, eventmask), the fileno constant matches the
         MockSocketListener.fileno() method, eventmask matches select.EPOLLIN
         """
         if len(self.network_queue) > 0:
-            return [(MOCK_SOCKET_FILENO, SELECT_EPOLLIN)]
+            obj = lambda: None
+            obj.fd = MOCK_SOCKET_FILENO
+            return [(obj, SELECTORS_EVENT_READ)]
         return []
 
     def prepare_and_run(self, network_queue):
@@ -104,10 +106,10 @@ class testBaseServer(unittest.TestCase):
         server._server_stats.increment_counter.assert_called_with("process_count")
         return server._handler
 
-    @patch("select.epoll")
-    def testRRQ(self, epoll_mock):
+    @patch("selectors.DefaultSelector")
+    def testRRQ(self, selector_mock):
         # link the self.poll_mock() method with the select.epoll patched object
-        epoll_mock.return_value.poll.side_effect = self.poll_mock
+        selector_mock.return_value.select.side_effect = self.select_mock
         self.network_queue = [
             # RRQ + file name + mode + optname + optvalue
             b"\x00\x01some_file\x00binascii\x00opt1_key\x00opt1_val\x00"
@@ -171,10 +173,10 @@ class testBaseServer(unittest.TestCase):
         stats_callback.side_effect = Exception("boom!")
         self.start_timer_and_wait_for_callback(stats_callback)
 
-    @patch("select.epoll")
-    def testUnexpectedOpsCode(self, epoll_mock):
+    @patch("selectors.DefaultSelector")
+    def testUnexpectedOpsCode(self, selector_mock):
         # link the self.poll_mock() emthod with the select.epoll patched object
-        epoll_mock.return_value.poll.side_effect = self.poll_mock
+        selector_mock.return_value.select.side_effect = self.select_mock
         self.network_queue = [
             # RRQ + file name + mode + optname + optvalue
             b"\x00\xffsome_file\x00binascii\x00opt1_key\x00opt1_val\x00"
