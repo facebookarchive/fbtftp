@@ -29,7 +29,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="fbtftp",
-    version="0.4",
+    version="0.5",
     description="A python3 framework to build dynamic TFTP servers",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -42,6 +42,10 @@ setup(
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "Topic :: System :: Boot",
         "Topic :: Utilities",
