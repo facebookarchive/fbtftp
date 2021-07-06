@@ -7,7 +7,7 @@ ifndef PYTHON3
 	endif
 endif
 PYTHON_MAJOR_AT_LEAST=3
-PYTHON_MINOR_AT_LEAST=3
+PYTHON_MINOR_AT_LEAST=4
 PYTHON_VERSION := $(shell $(PYTHON) -c 'from __future__ import print_function; import platform; print(platform.python_version())')
 CHECK_PYTHON_VERSION=$(shell $(PYTHON) -c 'from __future__ import print_function; import sys; print(0) if sys.version_info[:2] < ($(PYTHON_MAJOR_AT_LEAST), $(PYTHON_MINOR_AT_LEAST)) else print(1)')
 
