@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/facebook/fbtftp.svg?branch=master)](https://travis-ci.org/facebook/fbtftp)
+[![Build Status](https://travis-ci.org/facebook/fbtftp.svg?branch=main)](https://travis-ci.org/facebook/fbtftp)
 [![codebeat badge](https://codebeat.co/badges/2d4c7650-4752-4adf-a570-1948ecb4d6a8)](https://codebeat.co/projects/github-com-facebook-fbtftp)
 
 # What is fbtftp?
