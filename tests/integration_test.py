@@ -52,21 +52,14 @@ class StaticServer(BaseServer):
         )
 
 
-def busyboxClient(filename, blksize=1400, port=1069):
+def curlClient(filename, blksize=1400, port=1069):
     # We use busybox cli to test various bulksizes
     p = subprocess.Popen(
         [
-            find_executable("busybox"),
-            "tftp",
-            "-l",
-            "/dev/stdout",
-            "-r",
-            filename,
-            "-g",
-            "-b",
+            find_executable("curl"),
+            "--tftp-blksize",
             str(blksize),
-            "localhost",
-            str(port),
+            f"tftp://localhost:{port}/{filename}",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -76,8 +69,8 @@ def busyboxClient(filename, blksize=1400, port=1069):
 
 
 @unittest.skipUnless(
-    find_executable("busybox"),
-    "busybox binary not present, install it if you want to run " "integration tests",
+    find_executable("curl"),
+    "curl binary not present, install it if you want to run " "integration tests",
 )
 class integrationTest(unittest.TestCase):
     def setUp(self):
@@ -124,7 +117,7 @@ class integrationTest(unittest.TestCase):
             if child_pid:
                 # I am the parent
                 try:
-                    (p_stdout, p_stderr, p_returncode) = busyboxClient(
+                    (p_stdout, p_stderr, p_returncode) = curlClient(
                         self.tmpfile,
                         blksize=self.blksize,
                         # use the port chosen for the server by the kernel
