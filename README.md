@@ -34,8 +34,6 @@ We created our own Facebook-specific server based on the framework to:
 
 * stream static files (initrd and kernels) from our http repositories (no need
   to fill your tftp root directory with files);
-* generate grub2 per-machine configuration dynamically (no need to copy grub2
-  configuration files on disk);
 * publish per-server and per-connection statistics to our internal monitoring
   systems;
 * deployment is easy and "container-ready", just copy the application somewhere,
@@ -182,7 +180,7 @@ class StaticServer(BaseServer):
 
 def main():
     server = StaticServer(address='::', port=69, retries=3, timeout=5,
-                          root='/var/tftproot', 
+                          root='/var/tftproot',
                           handler_stats_callback=print_session_stats,
                           server_stats_callback=print_server_stats)
     try:
